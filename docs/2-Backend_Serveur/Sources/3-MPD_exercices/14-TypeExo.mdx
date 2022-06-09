@@ -1,0 +1,132 @@
+# Type exercice
+
+## Service
+
+```js title="./src/services/alecol.type_exo.service.js"
+import http from "../http-common";
+
+class TypeExoDataService {
+    getAll() {
+        return http.get("/typesExercice");
+    }
+
+    get(id) {
+        return http.get(`/typesExercice/${id}`);
+    }
+}
+
+export default new TypeExoDataService();
+```
+
+```js title="./src/services/index.js"
+const TypeExoService = require("./alecol.type_exo.service");
+...
+const Services = {};
+...
+Services.TypeExoService = TypeExoService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/type_exo.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const TypeExo = sequelize.define("type_exo", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        description: {
+            type: Sequelize.STRING,
+        },
+        TypeExo: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return TypeExo;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.type_exercice = require("./type_exo.model")(sequelize, Sequelize);
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.type_exo.controllers.js"
+const db = require("../models");
+const Type_Exercice = db.type_exercice;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les types d'exercice de la base de données
+exports.findAll = (req, res) => {
+    const typeExerciceId = req.query.id;
+
+    var condition = typeExerciceId
+        ? { qcmruId: { [Op.like]: `${typeExerciceId}` } }
+        : null;
+
+    Type_Exercice.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des types d'exercice.",
+            });
+        });
+};
+
+// Trouver un seul type d'exercice avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Type_Exercice.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération du type d'exercice avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.type_exo.routes.js"
+module.exports = (app) => {
+    const typeExercice = require("../controllers/alecol.type_exo.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les types d'exercice
+    router.get("/", typeExercice.findAll);
+
+    // Récupérer un seul type d'exercice avec id
+    router.get("/:id", typeExercice.findOne);
+
+    app.use("/api/type_exercice", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.type_exo.routes")(app);
+...
+```

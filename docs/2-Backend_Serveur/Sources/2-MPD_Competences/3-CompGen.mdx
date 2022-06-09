@@ -1,0 +1,161 @@
+# Compétence générale
+
+## Service
+
+```js title="./src/services/alecol.compgen.service.js"
+import http from "../http-common";
+
+class CompGenDataService {
+    getAll() {
+        return http.get("/compgen");
+    }
+
+    get(id) {
+        return http.get(`/compgen/${id}`);
+    }
+
+    findByClasseId(fk_classe_id) {
+        return http.get(`/compgen?fk_classe_id=${fk_classe_id}`);
+    }
+    
+    findByCatCompId(fk_catcomp_id) {
+        return http.get(`/compgen?fk_catcomp_id=${fk_catcomp_id}`);
+    }
+}
+
+export default new CompGenDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const CompGenService = require("./alecol.compgen.service");
+...
+const Services = {};
+...
+Services.CompGenService = CompGenService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/compgen.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const CompGen = sequelize.define("classe_catcomp_has_compgen", {
+        fk_classe_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "classe",
+                key: "id",
+            },
+        },
+        fk_catcomp_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "catcomp",
+                key: "id",
+            },
+        },
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        description: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return CompGen;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.compgen = require("./compgen.model")(sequelize, Sequelize);
+...
+// compgen => catcomp
+db.catcomp.hasMany(db.compgen, { foreignKey: "fk_catcomp_id" });
+db.compgen.belongsTo(db.catcomp, { foreignKey: "fk_catcomp_id" });
+
+// compgen => classe
+db.classes.hasMany(db.compgen, { foreignKey: "fk_classe_id" });
+db.compgen.belongsTo(db.classes, { foreignKey: "fk_classe_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.compgen.controllers.js"
+const db = require("../models");
+const CompGen = db.compgen;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les compétences générales de la base de données
+exports.findAll = (req, res) => {
+    const classeid = req.query.fk_classe_id;
+    const catcompid = req.query.fk_catcomp_id;
+
+    var classeCondition = classeid ? { fk_classe_id: { [Op.like]: `${classeid}` } } : null;
+    var catcompCondition = catcompid ? { fk_catcomp_id: { [Op.like]: `${catcompid}` } } : null;
+
+    var condition = classeCondition || catcompCondition;
+
+    CompGen.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des compétences générales.",
+            });
+        });
+};
+
+// Trouver une seule compétence générale avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    CompGen.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la compétence générale avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.compgen.routes.js"
+module.exports = (app) => {
+    const compgen = require("../controllers/alecol.compgen.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les compétences générales
+    router.get("/", compgen.findAll);
+
+    // Récupérer une seule compétence générale avec id
+    router.get("/:id", compgen.findOne);
+
+    app.use("/api/compgen", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.compgen.routes")(app);
+...
+```

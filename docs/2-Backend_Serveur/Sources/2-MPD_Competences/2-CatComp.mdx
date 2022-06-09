@@ -1,0 +1,142 @@
+# Catégorie de compétences
+
+## Service
+
+```js title="./src/services/alecol.catcomp.service.js"
+import http from "../http-common";
+
+class CatCompDataService {
+    getAll() {
+        return http.get("/catcomp");
+    }
+
+    get(id) {
+        return http.get(`/catcomp/${id}`);
+    }
+
+    findByMetaCompId(fk_mc_id) {
+        return http.get(`/catcomp?fk_mc_id=${fk_mc_id}`);
+    }
+}
+
+export default new CatCompDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const CatCompService = require("./alecol.catcomp.service");
+...
+const Services = {};
+...
+Services.CatCompService = CatCompService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/catcomp.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const CatComp = sequelize.define("catcomp", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        fk_mc_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "metacomp",
+                key: "id",
+            },
+        },
+    });
+
+    return CatComp;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.catcomp = require("./catcomp.model")(sequelize, Sequelize);
+...
+db.metacomp.hasMany(db.catcomp, { foreignKey: "fk_mc_id" });
+db.catcomp.belongsTo(db.metacomp, { foreignKey: "fk_mc_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.catcomp.controllers.js"
+const db = require("../models");
+const CatComp = db.catcomp;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les catégories de compétences de la base de données
+exports.findAll = (req, res) => {
+    const fk_mc_id = req.query.fk_mc_id;
+
+    var nameCondition = fk_mc_id
+        ? { fk_mc_id: { [Op.like]: `${fk_mc_id}` } }
+        : null;
+
+    var condition = nameCondition;
+
+    CatComp.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des catégories de compétences.",
+            });
+        });
+};
+
+// Trouver une seule catégorie de compétences avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    CatComp.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la catégorie de compétences avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.catcomp.routes.js"
+module.exports = (app) => {
+    const catcomp = require("../controllers/alecol.catcomp.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les catégories de compétences
+    router.get("/", catcomp.findAll);
+
+    // Récupérer une seule catégorie de compétence avec id
+    router.get("/:id", catcomp.findOne);
+
+    app.use("/api/catcomp", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.catcomp.routes")(app);
+...
+```

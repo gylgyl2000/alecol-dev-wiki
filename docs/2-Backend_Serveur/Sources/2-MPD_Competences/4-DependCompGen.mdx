@@ -1,0 +1,50 @@
+# Dépendance des compétences générales
+
+## Modèle
+
+```js title="./src/models/depend_compgen.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const DependCompGen = sequelize.define("depend_compgen", {
+        fk_compgens_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "classe_catcomp_has_compgen",
+                key: "id",
+            },
+        },
+        fk_compgent_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "classe_catcomp_has_compgen",
+                key: "id",
+            },
+        },
+        nom_compgens: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom_compgent: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+    });
+
+    return DependCompGen;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.dependCompgen = require("./depend_compgen.model")(sequelize, Sequelize);
+...
+// depend_compgen => classe_catcomp_has_compgen S
+db.compgen.hasMany(db.dependCompgen, { foreignKey: "fk_compgens_id" });
+db.dependCompgen.belongsTo(db.compgen, { foreignKey: "fk_compgens_id" });
+
+// depend_compgen => classe_catcomp_has_compgen T
+db.compgen.hasMany(db.dependCompgen, { foreignKey: "fk_compgent_id" });
+db.dependCompgen.belongsTo(db.compgen, { foreignKey: "fk_compgent_id" });
+...
+```

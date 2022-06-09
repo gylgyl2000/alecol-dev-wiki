@@ -1,0 +1,110 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Logique
+
+
+### Paires
+
+server.js
+
+#### Route
+./src/routes/alecol.reponse_paires.routes.js
+
+#### Contrôleur
+./src/controllers/alecol.reponse_paires.controllers.js
+
+#### Modèle
+./src/models/reponse_paires.model.js
+
+#### Service
+./src/services/alecol.reponse_paires.service.js
+
+#### Stratégie
+./src/strategies/Type_Link.js
+
+./src/Components/atoms/proposition/Proposition.js
+
+#### Contexte
+./src/contexts/PairAnswersContext.js
+
+./src/js/pairLinksController.js
+
+./src/Components/molecules/step/Step.js
+
+./src/Components/organisms/question/Questions.js
+
+-----
+
+### Memory
+
+server.js
+
+#### Route
+./src/routes/alecol.reponse_memory.routes
+
+#### Contrôleur
+../controllers/alecol.reponse_memory.controllers
+
+#### Modèle
+../models => db.reponse_memory = require("./reponse_memory.model")(sequelize, Sequelize);
+./src/models/reponse_memory.model.js
+
+#### Service
+./src/services/alecol.reponse_memory.service.js
+
+#### Strategie
+./src/strategies/Type_Flip.js
+
+
+-----
+
+
+**User.isLoggedIn**
+
+- ./src/my-app/App.js
+- ./src/services/index.js
+- ./src/services/alecol.[...].service.js
+
+- /
+- /inscription
+- /connexion
+- /home
+- /selection
+- /matieres
+- /themes
+- /competences
+- /exercices
+- /questions
+
+-----
+
+### Services
+
+#### /eleve
+
+- `GET` /eleve - getAll()
+- `GET` /eleve/${id} - get(id)
+- `POST` /eleve, data - post(data)
+- `GET` /eleve?prenom=${prenom} - findByNom(prenom)
+- `GET` /eleve?email=${email} - findByEmail(email)
+- `POST` /eleve/login, data - login(data)
+- `POST` /eleve/getUser, token - getUserFromToken(token)
+
+-----
+
+### Modèles
+
+-----
+
+### Contrôleurs
+
+-----
+
+
+-------
+
+```sql
+STORED
+concat(`FK_classe_id`,_utf8mb3\'-\',`FK_lesson_id`,_utf8mb3\'-\',`FK_natureactiv_id`,_utf8mb3\'-\',`num_activite`,_utf8mb3\'-\',`typrep`)
+```

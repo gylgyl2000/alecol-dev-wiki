@@ -1,0 +1,210 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Serveur
+
+## server.js
+
+```js title="./server.js"
+// Express est pour la construction de l'API Rest
+const express = require("express");
+// body-parser aide à analyser la requête et à créer l'objet req.body
+const bodyParser = require("body-parser");
+// cors fournit un middleware Express pour activer CORS avec diverses options
+const cors = require("cors");
+
+// créer une application Express
+const app = express();
+
+require("dotenv").config();
+
+var corsOptions = {
+    origin: `${process.env.REACT_APP_HOST}:${process.env.REACT_APP_FRONTEND_PORT}`,
+};
+
+// ajouter le middleware cors
+app.use(cors(corsOptions));
+
+// ajouter le middleware bodyparser pour analyser les requêtes de type de contenu - application/json
+app.use(bodyParser.json());
+// analyser les requêtes de type de contenu - application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// définir une route GET simple à tester
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to my application Alecol." });
+});
+
+// MPD Élève
+require("./src/routes/alecol.parent.routes")(app);
+require("./src/routes/alecol.eleve.routes")(app);
+require("./src/routes/alecol.classe.routes")(app);
+require("./src/routes/alecol.professeur.routes")(app);
+require("./src/routes/alecol.matiere.routes")(app);
+
+// MPD Compétences
+require("./src/routes/alecol.metacomp.routes")(app);
+require("./src/routes/alecol.catcomp.routes")(app);
+
+// MPD Exercices
+require("./src/routes/alecol.phaseapp.routes")(app);
+require("./src/routes/alecol.natureactiv.routes")(app);
+require("./src/routes/alecol.activite_clnt.routes")(app);
+require("./src/routes/alecol.exercice.routes")(app);
+require("./src/routes/alecol.Rep_txt.routes")(app);
+require("./src/routes/alecol.Rep_Img.routes")(app);
+require("./src/routes/alecol.reponse_exos.routes")(app);
+require("./src/routes/alecol.reponse_memory.routes")(app);
+require("./src/routes/alecol.reponse_paires.routes")(app);
+require("./src/routes/alecol.type_reponse.routes")(app);
+require("./src/routes/alecol.lesson.routes")(app);
+require("./src/routes/alecol.elements.routes")(app);
+
+
+// définir le port 8082 pour écouter les demandes entrantes
+const PORT = process.env.REACT_APP_BACKEND_PORT;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}.`);
+});
+
+const db = require("./src/models");
+const insertData = require("./src/scripts/insertData");
+// La synchronisation est à éviter pour plusieurs raisons :
+// Primo, c'est inutile et dangereux, car ça peut effacer les données : seulement si on positionne à force=true
+// Deuxio, elle recrée les tables, mais en ajoutant un S au nom de la table
+// Tertio, si on veut recréer les tables, il faut être très explicite
+//db.sequelize.sync({alter: true}).then(() => {
+// avec aucun paramètre, cela ne crée la table que si elle n'existe pas
+db.sequelize
+    .sync()
+    .then(() => {
+        console.log("Re-sync db.");
+    })
+    .then(() => {
+        // commenter la ligne suivante après la première insertion de données
+        //insertData.insertDummyData();
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+```
+
+## .env
+
+```shell title="./.env"
+REACT_APP_HOST=http://localhost
+REACT_APP_FRONTEND_PORT=8083
+REACT_APP_BACKEND_PORT=8082
+PORT=8083
+```
+## config
+
+### db.config.js
+
+```js title="./src/config/db.config.js"
+module.exports = {
+    HOST: "localhost",
+    USER: "alecolweb",
+    PORT: "3306",
+    PASSWORD: "2P2xjKVUaB@Bei29",
+    DB: "alecol_db",
+    dialect: "mysql",
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+    }
+};
+```
+
+## http-common.js
+
+```shell title="http-common.js"
+import axios from "axios";
+
+export default axios.create({
+    baseURL: "http://localhost:8082/api",
+    headers: {
+        "Content-type": "application/json",
+    },
+});
+```
+
+## scripts
+
+### insertData
+
+```js title="./src/scripts/insertData.js"
+const db = require("../models");
+const matiereList = require("../Data/Contenu/matiereList");
+const themeList = require("../Data/Contenu/themeList");
+const leconList = require("../Data/Contenu/leconList");
+const exerciceList = require("../Data/Contenu/exerciceList");
+const questionsList = require("../Data/Contenu/questionList");
+const reponseList = require("../Data/Contenu/reponseList");
+const propositionList = require("../Data/Contenu/propositionList");
+
+exports.insertDummyData = () => {
+    matiereList.matiereList.map((matiere) => {
+        db.matiere.create({ id: matiere.id, nom: matiere.name });
+    });
+
+    themeList.themeList.map((theme) => {
+        db.themes.create({
+            id: theme.id,
+            nom: theme.name,
+            matiereId: theme.idMatiere,
+        });
+    });
+
+    leconList.leconList.map((lecon) => {
+        db.lesson.create({
+            id: lecon.id,
+            nom: lecon.nom,
+            description: lecon.description,
+            contenu: "test",
+            themeId: lecon.idTheme,
+        });
+    });
+
+    exerciceList.exerciceList.map((exercice) => {
+        db.exercices.create({
+            id: exercice.id,
+            nom: exercice.name,
+            description: exercice.description,
+            lessonId: exercice.idLesson,
+        });
+    });
+
+    questionsList.questionList.map((question) => {
+        db.questions.create({
+            id: question.id,
+            nom: question.nom,
+            libelle: question.contenu,
+            exerciceId: question.idExercice,
+        });
+    });
+
+    reponseList.reponseList.map((reponse) => {
+        db.reponses.create({
+            id: reponse.id,
+            nom: reponse.nom,
+            libelle: reponse.contenu,
+            qcmruId: reponse.idQuestion,
+        });
+    });
+
+    propositionList.propositionList.map((proposition) => {
+        db.propositions.create({
+            id: proposition.id,
+            contenu: proposition.contenu,
+            qcmruId: proposition.idQuestion,
+        });
+    });
+};
+```

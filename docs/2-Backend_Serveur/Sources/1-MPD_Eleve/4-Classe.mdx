@@ -1,0 +1,144 @@
+# Classe
+
+## Service
+
+```js title="./src/services/alecol.classe.service.js"
+import http from "../http-common";
+
+class ClasseDataService {
+    getAll() {
+        return http.get("/classes");
+    }
+
+    get(id) {
+        return http.get(`/classes/${id}`);
+    }
+
+    findByNom(nom) {
+        return http.get(`/classes?nom=${nom}`);
+    }
+}
+
+export default new ClasseDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const ClasseService = require("./alecol.classe.service");
+...
+const Services = {};
+...
+Services.ClasseService = ClasseService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/classe.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Classe = sequelize.define("classe", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return Classe;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.classes = require("./classe.model")(sequelize, Sequelize);
+...
+
+/**
+ * créer des dépendances entre les modèles
+ */
+
+db.classes.belongsToMany(db.lessons, {
+    through: "classe_lesson",
+    foreignKey: "classe_id",
+});
+db.lessons.belongsToMany(db.classes, {
+    through: "classe_lesson",
+    foreignKey: "lesson_id",
+});
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.classe.controllers.js"
+const db = require("../models");
+const Classe = db.classes;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les classes de la base de données.
+exports.findAll = (req, res) => {
+    const nom = req.query.nom;
+
+    var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+
+    var condition = nameCondition;
+
+    Classe.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Some error occurred while retrieving Exercices.",
+            });
+        });
+};
+
+// Trouver une seule classe avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Classe.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Error retrieving Exercice with id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.classe.routes.js"
+module.exports = (app) => {
+    const classes = require("../controllers/alecol.classe.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les classes
+    router.get("/", classes.findAll);
+
+    // Récupérer une seule classe avec id
+    router.get("/:id", classes.findOne);
+
+    app.use("/api/classes", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.classe.routes")(app);
+...
+```

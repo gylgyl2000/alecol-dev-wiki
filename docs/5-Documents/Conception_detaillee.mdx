@@ -1,0 +1,268 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Conception détaillée
+
+## I. Architecture Générale
+
+Le schéma suivant représente l’architecture générale du site ainsi que les différents composants qui le permettent de fonctionner correctement.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-AG01.png"
+         alt="Figure 1 : Architecture Générale du site" />
+    <figcaption>Figure 1 : Architecture Générale du site</figcaption>
+</figure>
+
+### 1. Frontend
+
+Se compose de 3 parties :
+- **Le Router : ReactRouter** permet de naviguer entre les différentes pages du site.
+- **Les Composants** : constituent l’aspect visuel du site, ils sont répartis selon une architecture appelée « atomic design » qui décompose la page en 3 parties :
+    - **Atoms** : les composants les plus petits et qui ne dépendent d’aucun autre composant, par exemple un bouton, un titre…
+    - **Molecules** : ils se composent d’un ensemble d’Atom, par exemple le header qui se compose de l’Atom Logo et d’une liste de liens.
+    - **Organisms** : sont constitués de plusieurs Molecules, par exemple le contenu de l’exercice (liste des cartes) ainsi que la barre qui permet de valider ou
+    réinitialiser une question.
+- **Les services** : chaque service est lié généralement à un Model dont il est lié indirectement à une table de la base de données, le rôle du service et d’envoyer
+des requêtes au serveur via Axios (protocole HTTP) et de fournir les données reçues aux composants qui s’en charge de la visualisation.
+
+### 2. Backend
+
+Se compose de 3 parties :
+- **Le Router** : le router intercepte les requêtes provenant du frontend et selon la requête appelle le contrôleur adéquat pour la traiter et retourner une réponse
+qui est envoyé à la fin au frontend.
+- **Le contrôleur** : interroge la base de données à travers l’ORM et récupère les données, puis les envois au frontend.
+- **ORM** : c’est la partie qui lie chaque model à la table correspondante de la base de données.
+
+## II. Gestion d’état
+
+### 1. Définition
+
+Un état est une instance d’un composant React et peut être défini comme un objet d'un ensemble de propriétés qui contrôlent le comportement du composant. Autrement
+dit, l'état d'un composant est un objet qui contient des informations susceptibles de changer au cours de la durée de vie du composant.
+
+### 2. Difficultés Rencontrés et Solutions
+
+- React peut regrouper plusieurs appels de `setState()` dans une mise à jour unique pour la performance. Étant donné que les props et le state peuvent être mis à
+jour de manière asynchrone, il ne faut pas faire confiance à leurs valeurs pour calculer l'état suivant.<br />
+<br />
+Un exemple simple serait d’itérer sur la liste des matières reçue, et de stocker cette liste dans l’état. Dans ce cas, il faut itérer sur la liste toute en se
+basant sur l’état précédant pour le mettre à jour à chaque fois.<br />
+<br />
+La solution est d’utiliser la version surchargée du la fonction `setState()`, qui consiste à passer une fonction à celle-ci en passant l’état précédant en paramètre.<br /><br />
+- Dans certain cas, on peut avoir besoin d’une donnée considéré comme globale dans plusieurs composants différents.<br />
+<br />
+Comment faire par exemple pour stocker une référence vers la première carte choisie (exercice memory), et de comparer celle-ci avec la deuxième carte choisie.<br />
+<br />
+Une idée est d’utiliser **Context API** qui permet de rendre les données globales, dans ce cas une référence vers la première carte sera stockée et au moment où la
+deuxième carte est choisi on peut la comparer avec la première carte.<br />
+<br />
+**Context API** permet aussi d’éviter ce qu’on appelle le **Prop Drilling** qui est tout simplement le fait de devoir passer une information d’un composant parent à
+un composant enfant en passant par tous les composants entre eux qui n’ont pas besoin de cette information.
+
+## III. Les types d’exercices
+
+### a. Exercice de type « sélection »
+
+```js title="Code 1 : Proposition de type Sélection"
+    return (
+        <div classeName="proposition__container">
+            <button
+                classeName="reponse__button"
+                onClick={(e) => {
+                    clickHandler(e);
+                }}
+            >
+                <h3>
+                    <strong>{props.proposition}</strong>
+                </h3>
+            </button>
+        </div>
+    );
+```
+
+Le clic sur un bouton exécute la fonction `clickHandler` qui ajoute la chaine « `activeChoice` » à la liste des classeName du bouton (code 2), ce qui permet de
+récupérer les éléments qui contient cette chaine au moment de l’évaluation et les comparer avec la liste des réponses juste (code 3).
+
+```js title="Code 2 : Le bloc exécuté quand un bouton est appuyé"
+const clickHandler = (e) => {
+    if (e.target.classList.contains("activeChoice")) {
+        e.target.classList.remove("activeChoice");
+    } else {
+        e.target.classList.add("activeChoice");
+    }
+};
+```
+
+Pour l’évaluation, on vérifie tout d’abord si le nombre de réponses choisi est égale au nombre de réponses juste, si ce n’est pas le cas, on peut dire que l’élève
+a échoué à l’exercice.
+
+Si le nombre de réponses choisi (liste 1) est égale au nombre de réponses juste (liste 2) on vérifie si chaque élément de la première liste existe dans la deuxième
+liste.
+
+Le tableau `arr` contient les éléments sélectionnés par l’utilisateur, celui-ci est comparé avec les réponses juste stocké dans le tableau `reponses` (ligne 23).
+
+```js title="Code 3 : fonction d'évaluation" showLineNumbers
+const evaluate() {
+    // récupérer les réponses choisies par l'utilisateur sous forme de nodes html
+    const activeResponses = document.getElementsByClassName("activeChoice");
+    // les transformer en tableau
+    let array = [...activeResponses];
+    // ce tableau contiendra les réponses choisies par l'utilisateur
+    let arr = [];
+    // ce tableau contiendra les réponses justes
+    let responses = [];
+    /**
+     * pour chaque élément html activeChoice, on récupère la valeur qu'il contient
+     * et on la stocke dans le tableau arr
+     *    si cela concerne une carte on récupère la valeur de l'attribut proposition
+     *    sinon on récupère le textContent directement.
+     */
+    array.map((item) => {
+        if (item.classList.contains("flipper__container--back")) {
+            arr.push(item.attributes.proposition.value);
+        } else {
+            arr.push(item.textContent);
+        }
+    });
+    // pour chaque réponse on stocke le libellé dans un autre tableau.
+    reponses.map((item) => {
+        responses.push(item.libelle);
+    });
+    /**
+     * si le nombre de réponses n'est pas égale au nnombre de réponses juste l'utilisateur a échoué à l'exercice
+     * sinon si le tableau de réponses juste inclus les réponses du tableau des réponses choisi, on valide la question
+     */
+    if (responses.length !== arr.length) {
+        setCorrection(true);
+        return false;
+    } else if (responses.every((item) => arr.includes(item))) {
+        setCorrection(true);
+        setNoter(true);
+        return true;
+    } else {
+        setCorrection(true);
+        return false;
+    }
+}
+```
+
+### b. Exercice de type « drag and drop »
+
+
+Figure 1 : Proposition de type drag and drop
+
+Il faut tout d’abord permettre de glisser déposer dans les deux zones (zone des réponses possibles et la zone de réponses), donc on rend l’élément glissable avec draggable= «true» (figure 1).
+ 
+On a besoin maintenant d’une fonction drag (figure 1 et 2) de glissement qui permettra d’enregistrer l’élément glissable dans un évènement.
+
+
+Figure 2 : fonction permettant de glisser un élément
+
+
+On peut maintenant définir la méthode drop (figure 3) qui permettra de déposer l’élément à la position souhaité.
+Comme vous pouvez le remarquer, la chaine « activeChoice » est utilisé ici pour identifier les réponses dans la zone de réponses.
+	
+Figure 3 : fonction qui permet de déposer un élément
+
+
+
+L’état state est un objet qui contient deux listes, une liste items qui correspond aux éléments non sélectionnés et une deuxième liste selected qui correspond aux éléments sélectionnés.
+
+Le fait de glisser une réponse possible vers la zone de réponses ajoute la chaine « activeChoice » à la liste des classeName du bouton, ce qui permet de récupérer les éléments qui contient cette chaine au moment de l’évaluation et de les comparer avec la liste des réponses juste.
+
+
+
+
+
+    c. Exercice de type « Memory »
+
+Le jeu se compose de paires de cartes portant des illustrations identiques. L’élève retourne deux cartes de son choix. S'il découvre deux cartes identiques, ils restent visibles. Si les cartes ne sont pas identiques, ils sont retournés faces cachées. 
+Le jeu se termine quand toutes les paires de cartes ont été découvertes.
+Quand l’élève découvre deux cartes identiques, la chaine « activeChoice » est ajoutée à la liste des className de la première carte, ce qui permettra de les récupérer par la suite pour appliquer la même méthode d’évaluation que les autres types d’exercices. 
+    • Fonctionnement
+
+            Figure 4: Rendu visuel de la carte
+
+En cliquant sur une carte la fonction « flipCard » est exécuté qui stocke une référence vers la première carte dans un état global (Context API), si la première carte est déjà choisie alors la fonction « flipCard » stocke la deuxième carte dans un autre état global.
+
+
+
+Quand l’un de ces deux états globaux est initialisé, la fonction useEffect est déclenché, ce qui permettra d’exécuter la fonction « showCard », cette dernière change l’état de la carte à « tournée » et incrémente la valeur de l’état « cardFlipped » qui représente le nombre de cartes tournées.
+
+
+
+
+
+Quand l’état cardFlipped atteint la valeur 2, une autre fonction useEffect est déclenché, cette dernière exécute la fonction « evaluate » qui change la valeur de l’état « Match », donc cet état prend la valeur « no match » quand les cartes ne sont pas identiques, sinon prend la valeur «match», dans le premier cas un setTimout est mis en place et les cartes sont retournés faces cachées, dans le cas de « match », les deux cartes restent visibles.  
+
+
+
+PS : la même fonction générique est utilisée pour évaluer les différents types d’exercices, la méthode consiste à ajouter la chaine de caractère « activeChoice » à la liste des className de la réponse choisie pour ensuite les récupérer et les comparer avec la liste des réponses juste. La méthode est nommée « evaluate » et fait partie du composant « Step » dans le fichier Step.js
+    • Pseudo-code
+
+    d. Exercice de type « Link »
+L’exercice de type link permet de lier les éléments qui se correspond, sachant que les éléments à gauche sont des textes et les éléments à droite sont des images.
+
+La méthode firstClickHandler sert à récupérer le texte choisi et la méthode secondClickHandler sert à récupérer l’image choisi correspondante. 
+
+
+Dès que les deux éléments sont choisis, on crée une flèche du premier texte choisi vers l’image correspondante avec la bibliothèque React LeaderLine et on réinitialise les deux états correspondant au texte et à l’image sélectionnés.
+
+
+    e. Exercice de type « Fill » ou « phrases à trous »
+Cet exercice concerne les phrases à trous mais aussi le calcul posé, l’idée est d’avoir des cases vides à certains positions, ces positions sont stockées dans la table reponse avec les réponses justes.
+Pour une phrase à trous, on spécifie les réponses justes et ses positions de cette façon dans la base de données : 
+
+
+
+
+En récupérant ces réponses, on peut savoir où insérer les cases vides. Le code ci-après permet de transformer la phrase en question à un tableau de mots, d’insérer la case vide à la bonne position et de reconstruire la phrase.
+
+L’évaluation se fait en vérifiant la position du texte glissé mais aussi en vérifiant l’intitulé du texte.
+Concernant le calcul posé, une liste de réponses correspondant à des identifiants d’images est stockée dans la table reponse de la base de données, ces images représentent les chiffres de 0 à 9 avec lesquelles l’enfant peut former un nombre.
+
+Le code suivant initialise les cases vides qu’on va ajouter par la suite à l’ensemble du calcul posé.
+
+Le code suivant analyse le texte et récupère tout d’abord le signe de l’opération, on récupère par la suite les deux nombres de l’opération et on initialise le texte de l’opération toute en insérant les cases vides à la fin.
+
+
+L’évaluation se fait en vérifiant la position du l’image glissé mais aussi en vérifiant si son identifiant correspond au texte enregistré dans la base de données comme le montre le code ci-dessous.
+
+
+
+    f. Exercice de type « Sériation » : 
+Ce type d’exercice permet de ranger des éléments suivant la taille, le poids, la valeur …, pour le faire fonctionner on doit stocker les noms des images dans la table de choix, ces images doivent être stocké dans le dossier src/Data/Images.
+
+La prochaine étape est de stocker l’ordre et les identifiants des images dans la table réponse.
+
+Pour pouvoir afficher l’image il faut lire le nom de l’image à partir de la base de données et l’insérer par la suite dans le dom donc il faut appeler la méthode require dans la méthode map.
+
+
+La fonction seriationDrop permet de récupérer l’image glissé ainsi que l’image de destination, on récupère par la suite le conteneur de chacune des images, et pour chaque conteneur on définit l’image opposé comme enfant du conteneur.
+
+
+
+Pour évaluer le travail de l’enfant il faut vérifier tout d’abord si les positions des images sont bonnes ont comparant avec les valeurs dans la table reponse.
+On vérifie par la suite si l’identifiant de chaque image est égale à la valeur stocké dans la table réponse. 
+ 
+
+
+
+    IV. Le design pattern Strategy
+Au tout début du projet, un switch-case permettais de définir l’affichage selon le type de l’exercice, et a chaque fois qu’on voulait ajouter un autre type d’exercice, le code du switch-case devenait de plus en plus long.
+Cette implémentation ne respectait pas le principe open/closed, ce qui rendait le code de plus en plus non maintenable.
+La solution était d’implémenter le design pattern Strategy qui prend en compte le type de l’exercice et définit le type d’affichage lors de l’exécution.
+L’implémentation suivante représente la fameuse classe Context du design pattern Strategy, c’est elle qui permet de définir la stratégie au moment de l’exécution et donc d’appeler la méthode render adéquate.
+
+
+L’image suivante montre les différentes stratégies qui représente chacune un type d’exercice.
+
+
+
+
+Chaque stratégie implémente la méthode render qui est appelé au moment de l’exécution.
+
+Pour appliquer ce design pattern on initialise tout d’abord le Context TypeExerciceManager, et selon le type on récupère la stratégie, il suffit après d’affecter cette dernière au context et d’appeler la méthode render du context.
+
+
+PS : il faut que le type d’exercice dans la base corresponde au nom de la stratégie crée.

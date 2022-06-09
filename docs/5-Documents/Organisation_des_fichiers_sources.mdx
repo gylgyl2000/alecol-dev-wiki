@@ -1,0 +1,383 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Organisation des fichiers sources
+
+## I. Architecture MVC
+
+**Définition :** MVC signifie *Model-View-Controller*. Il s’agit d’une architecture ou d’un modèle de conception logicielle qui facilite la création d’applications énormes. Il n’appartient pas à un langage de programmation ou à un Framework spécifique, mais c’est un concept que vous pouvez utiliser pour créer tout type d’application ou de logiciel dans n’importe quel langage de programmation.
+
+Le schéma suivant représente l’architecture MVC du site ainsi que les différents composants qui le permettent de fonctionner correctement :
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-MVC01.png"
+         alt="Figure 1 : Architecture MVC" />
+    <figcaption>Figure 1 : Architecture MVC</figcaption>
+</figure>
+
+### 1. Modèle - base de données
+
+Le modèle fonctionne directement avec la base de données. Il n’a pas à traiter de l’interface utilisateur ou du traitement des données. Dans un scénario réel, vous utiliserez simplement le modèle pour récupérer, insérer, mettre à jour et supprimer des données de votre base de données et définit les données et la logique applicative :
+- Encapsule les données de l'application
+- Exécute les commandes de mise à jour des données
+- Répond aux requêtes de consultation
+
+### 2. Vue - client
+
+En termes simples, Vue est l’interface utilisateur sur laquelle notre client / utilisateur peut effectuer certaines actions. Il contient HTML, CSS, JS, XML ou tout autre langage de balisage que nous pouvons utiliser pour créer une belle interface utilisateur. Il contient également du code pour afficher les données qu’il reçoit de notre application, elle présente graphiquement les données du modèle :
+- Se rafraîchit à la demande
+- Fournit des informations complémentaires lors de l'action de l'utilisateur
+
+### 3. Contrôleur - serveur
+
+Le contrôleur est la partie dans laquelle nous traitons les données après avoir reçu une demande de Vue et avant de mettre à jour quoi que ce soit dans notre base de données avec notre modèle.
+- Récupère des informations à partir de la vue
+- Traduit les actions de l'utilisateur en commandes de modification du modèle
+
+Dans notre application l’architecture se concrétise dans les dossiers suivants :
+- Contrôleur -> dossier “controllers”
+- Vue -> dossier “components”
+- Modèle -> dossier “models”
+
+-----
+
+## II. Le pattern Atomic Design
+
+**Définition :** L’idée derrière la méthodologie est de considérer les composants comme des blocs de construction. Les composants sont rassemblés, allant de composants simples à faible complexité à des composants plus complexes. Les principaux avantages derrière ce modèle architectural sont la cohérence de la conception (par exemple, les champs d’entrée se ressemblent toujours) ainsi que la réutilisabilité (en particulier parmi les composants de l’atome et de la molécule qui ne sont pas fortement avisés). La méthode à ce principe consiste à décomposer votre conception en composants jusqu’à ce que le composant ne puisse plus être décomposé.
+
+Le schéma suivant représente architecture appelée « Atomic design » :
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA00.png"
+         alt="Figure 2 : Architecture Atomic design" />
+    <figcaption>Figure 2 : Architecture Atomic design</figcaption>
+</figure>
+
+### 1. Organismes
+
+Les organismes sont constitués de plusieurs molécules et/ou atomes. Les organismes deviennent de plus en plus complexes. C’est là que l’état peut commencer à montrer sa présence (par exemple, un composant `<Form />` ou `<Navigation>`).
+
+#### a. `competence`
+
+Un composant qui représente une compétence d’un élève sélectionnée à partir d’une liste avec deux autres composants qui sont *Description* et *Item*.
+
+Les fonctions utilisées :
+- `setCompetence` qui permet d’initialiser une compétence basé sur son nombre.
+- `SelectionHandler` qui initialise une compétence par la valeur sélectionnée (elle fait appel à la première méthode).
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA01.png"
+         alt="Organisme competence" />
+</figure>
+
+#### b. `exercice`
+
+Un composant qui affiche `StatusBar` et la liste des exercices.
+
+Les fonctions utilisées :
+- `SetExcercice` qui permet d'initialiser l'exercice sélectionné
+- `SetImage` qui modifie la valeur responsable de la navigation entre les images de transition.
+- `OpenExcercice` qui redirige vers la page des questions et affiche les questions de l'exercice sélectionné étape par étape.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA02.png"
+         alt="Organisme exercice" />
+</figure>
+
+#### c. `home`
+Un composant graphique qui représente la vue de la page Home obtenue après le Login, on trouve les iles proposées à jouer.
+
+Les fonctions utilisées :
+- `setExcercice` qui permet de sélectionner l’excercice.
+- `SetIle` qui permet de sélectionner l’ile.
+- `SetDonneExcercice` qui vérifier que l’excercice est bien charge.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA03.png"
+         alt="Organisme home" />
+</figure>
+
+#### d. `matiere`
+Un composant qui permet de montrer la vue d’une matière sélectionnée.
+
+Les fonctions utilisées :
+- `setMatiere` qui permet de sélectionner la matiere en basant sur l’identifiant “id” de l’objet.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA04.png"
+         alt="Organisme matiere" />
+</figure>
+
+#### e. `question`
+Récupère la liste des questions de l'exercice ainsi que le type d'exercice.
+
+Les fonctions utilisées :
+- `setExercice` initialise l'exercice sélectionné basant sur l’identifiant de l’objet sélectionnée.
+- `setQuestions` initialise la liste des questions basant sur la liste des questions.
+- `GetExoType` récupère le type de l'exercice sélectionné.
+
+#### f. `register`
+Le composant responsable de l’enregistrement du client ”élève” base sur une registrform.
+
+Le code utilise : une portion de code qui nous permet de vérifier la similarité des mots de passe entre eux et l'enregistre, l’existence de l’email et enfin de compte d’enregistrer les informations mentionnées et crypter le mot de passe par la fonction bcrypt.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA06.png"
+         alt="Organisme register" />
+</figure>
+
+#### g. `selection`
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA07.png"
+         alt="Organisme selection" />
+</figure>
+
+#### h. `signin`
+Le composant responsable de la connexion du client à son compte basé sur un formulaire.
+
+Le code utilise : une portion de code qui nous permet de vérifier l’existence des informations rentrées sur notre base de données.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA08.png"
+         alt="Organisme signin" />
+</figure>
+
+#### i. `theme`
+Affiche la liste des thèmes et initialise l'état correspondant au thème sélectionné.
+
+Les fonctions utilisées :
+- `selectionHandeler` qui se base sur la fonction `setTheme` qui permet d’initialiser le theme.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA09.png"
+         alt="Organisme theme" />
+</figure>
+
+### 2. Molécules
+
+Plusieurs atomes peuvent former une molécule (par exemple un `<IconButton />`). Les Molécules sont également assez simples et seraient probablement sans état, mais peuvent contenir un état de bascule simple ou similaire.
+
+#### a. `choiceList`
+
+Un composant de catégorie molécule qui permet d’afficher une liste des choix et/ou des réponses.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA10.png"
+         alt="Molécule choiceList" />
+</figure>
+
+#### b. `competenceList`
+
+Permet de récupèrer et d'afficher la liste des compétences par thème.
+
+Les fonctions utilisées :
+- `setCompetences` Modifie la liste des compétences.
+- `setTheme` définit la valeur du thème.
+- `setActiveRoute` permet de changer la référence vers la page courante.
+- `GetThemecompetence` récupère la liste des Compétences par thème.
+- `GetAllCompetence` récupère la liste de tous les thèmes.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA11.png"
+         alt="Molécule competenceList" />
+</figure>
+
+#### c. `excerciceList`
+
+Permet de récupèrer et d'afficher la liste des exercices.
+
+Les fonctions utilisées :
+- `setActiveRoute` permet de changer la référence vers la page courante.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA12.png"
+         alt="Molécule excerciceList" />
+</figure>
+
+#### d. `form`
+
+Une molécule qui représente le formulaire utilisé pour la connexion. Il se base sur Alert, Btn, Link, Logo, Field comme des atomes.
+
+Le code de fonctionnement du formulaire se trouve dans les organismes dont il fait partie de leur construction.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA13.png"
+         alt="Molécule form" />
+</figure>
+
+#### e. `header`
+
+Un composant qui représente une partie de vue avec des buttons, qui contient des liens vers différents page (matière, thème, compétence, exercice) construit à partir d’un logo et une liste d’item.
+
+Les fonctions utilisées :
+- `setMenuItem` qui permet de modifier la liste des liens vers différentes pages.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA14.png"
+         alt="Molécule header" />
+</figure>
+
+#### f. `matiereList`
+
+Un composant de catégorie molécule qui permet d’afficher la liste des matières et leurs descriptions.
+
+Les fonctions utilisées :
+- `setMatiere` qui initialise la liste des matières.
+- `GetAllMatiere` récupère la liste de toutes les matières et les charges dans le state.
+- une portion de code qui modifier la référence vers la page courante.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA15.png"
+         alt="Molécule matiereList" />
+</figure>
+
+#### g. `navBar`
+
+Un composant qui représente partie d’une vue ou se trouve les deux Button Next et forward.
+
+Les fonctions utilisées :
+- `setActiveRoute` permet de changer la référence vers la page courante.
+- `setBtn` permet de définir si c'est un bouton de réinitialisation ou de retour.
+- `setBtnText` change le texte du bouton de droite.
+- `setResetBtn` permet d'initialiser le bouton de réinitialisation.
+- `Next` cette fonction est exécutée une fois que le bouton "valider" est cliqué, elle évalue les réponses de la question, si les réponses sont correctes, on passe à la prochaine question.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA16.png"
+         alt="Molécule navBar" />
+</figure>
+
+#### h. `statusBar`
+
+Composant qui nous permet d’afficher le score se basant sur les atomes `logo` et `score`.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA17.png"
+         alt="Molécule statusBar" />
+</figure>
+
+#### i. `step`
+
+Permet la définition d'une question de l'exercice courant, construit à partir de `choiceList`, `snackbar`, `alert`, `navbar`.
+
+Les fonctions utilisées :
+- `setPairAnswers` modifie la valeur du `Key`.
+- `setKey` modifie la valeur du `Key`.
+- `setChoices` initialise la liste des choix d'une question.
+- `setReponses` initialise la liste des réponses d'une question.
+- `setCorrection` modifie la valeur de cette variable.
+- `setOpen` modifie la valeur de cette variable.
+- `setNoter` modifie la valeur de cette variable.
+- `setConsigne` modifie la valeur du `Key`.
+- `setLibelle` modifie le libellé de la question.
+- `setVides` initialise la liste des réponses d'une question.
+- `setDone` initialise la liste des réponses d'une question.
+- `setStyle` initialise la liste des réponses d'une question.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA18.png"
+         alt="Molécule step" />
+</figure>
+
+#### j. `steps`
+
+Composant qui permet d'afficher les questions étape par étape à partir du composant précèdent “step”.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA19.png"
+         alt="Molécule steps" />
+</figure>
+
+#### k. `themeList`
+
+Molécule qui affiche la liste des thèmes récupérés pour la matière sélectionnée en utilisant `ListGroup`, `Item` et `description`.
+
+Les fonctions utilisées :
+- `setThemes` initialise la liste des thèmes.
+- `setMatiere` modifie la matière sélectionnée.
+- `setActiveRoute` permet de changer la référence vers la page courante.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/OFS-OMA20.png"
+         alt="Molécule themeList" />
+</figure>
+
+### 3. Atomes
+
+Le plus petit composant possible sera l’atome (par exemple un `<Icon />`, `<Paragraphe />` ou un `<Button />`). La méthodologie de conception atomique détermine les atomes comme des composants qui ne peuvent pas être décomposés davantage et qui ont encore un sens. Il serait donc logique de créer une liste en tant qu’atome, bien qu’elle contienne des éléments de liste, car les éléments de liste (`<li>`) n’ont aucune valeur à moins qu’ils ne soient représentés dans `<ul>` ou `<ol>`. Les atomes sont par définition super simples. Dans React, ceux-ci seraient très certainement apatrides.
+
+#### a. `alert`
+
+Composant graphique qui est “une fenêtre” à afficher en cas d’erreur.
+
+#### b. `btn`
+
+Composant graphique `Button` utilisé pour soumettre le formulaire.
+
+#### c. `card`
+
+Composant qui affiche une carte et permet de contrôler son état (tournée, cache).
+
+Les fonctions utilisées
+- `setCardResultsContext` ajoute une combinaison dans la liste.
+- `setIsFlipped` modifie l'état de la carte.
+- `setMatch` modifie la valeur du match (3 états : 'match' , 'no match', '').
+- `setCardFlipped` incrémente/décrémente le nombre de carte tournées.
+- `setFirstChosenCard` initialise une référence vers la première carte sélectionnée.
+- `setSecondChosenCard` initialise une référence vers la deuxième carte sélectionnée.
+- `FlipCard` initialise la première et la deuxième carte sélectionnées.
+- `turnCard` cache une carte et décrémente le nombre de carte tournées.
+- `HideCard` vérifie si cela concerne la bonne carte avant de la cacher.
+- `ShowCard` rend une carte visible et incrémente le nombre de cartes visibles.
+- `Evaluate` compare les 2 cartes choisies et retourne le résultat dans le state.
+
+#### d. `description`
+
+Composant qui donne une description de la matière, du thème, de laleçon, ou de l'exercice.
+
+#### e. `exit`
+
+C’est l’élément de sortie, il est représenté par une image.
+
+#### f. `field`
+
+Composant qui donne l’entrée des informations mentionnée par le client, il se trouve dans les Forms et tout composant qui nécessite une réponse du client.
+
+#### g. `headerItem`
+
+Composant responsable de la définition d'une des sections du Header (matières, thèmes, exercices...).
+
+#### h. `item`
+
+Composant qui nous permet de définir un item de la liste (liste des matières, des compétences, des exercices).
+
+#### i. `logo`
+
+Le logo du site.
+
+#### j. `privateRoute`
+
+Composant qui dirige vers la route “connexion” si le login est bien vérifié.
+
+#### k. `proposition`
+
+Composant qui affiche un choix ou une réponse :
+- Cas `dnd` : affiche des textes glissables.
+- Cas `flip` : affiche une carte.
+- Cas `Link` : dans le cas des choix affiche un text.
+- Cas des réponses affiche des images.
+- Cas `select` : affiche les choix sous forme de boutons.
+
+#### l. `publicRoute`
+
+Composant qui nous dirige vers la route “home” si le login est bien vérifié.
+
+#### m. `score`
+
+Responsable d’afficher le score dépendant de la progression, des récompenses et un scorebox.
+
+#### n. `scoreBox`
+
+Affiche le score qui dans ce cas une forme linéaire.
+

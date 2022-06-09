@@ -1,0 +1,31 @@
+# Élève => matière
+
+## Modèle
+
+```js title="./src/models/eleve_has_matiere.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const EleveHasMatiere = sequelize.define("eleve_has_matiere", {
+        fk_eleve_id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+        },
+        fk_matiere_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+    });
+
+    return EleveHasMatiere;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.eleveHasMatiere = require("./eleve_has_matiere")(sequelize, Sequelize);
+...
+db.eleves.belongsToMany(db.matieres, {through: "eleve_has_matiere", foreignKey: "eleve_id",});
+db.matieres.belongsToMany(db.eleves, {through: "eleve_has_matiere", foreignKey: "matiere_id",});
+...
+```
+
+-----

@@ -1,0 +1,148 @@
+# Leçon
+
+## Service
+
+```js title="./src/services/alecol.lesson.service.js"
+import http from "../http-common";
+
+class LessonDataService {
+    getAll() {
+        return http.get("/lessons");
+    }
+
+    get(id) {
+        return http.get(`/lessons/${id}`);
+    }
+
+    findByNom(nom) {
+        return http.get(`/lessons?nom=${nom}`);
+    }
+
+    findByCatComp(fk_catcomp_id) {
+        return http.get(`/lessons?fk_catcomp_id=${fk_catcomp_id}`);
+    }
+}
+
+export default new LessonDataService();
+```
+
+```js title="./src/services/index.js"
+const LessonService = require("./alecol.lesson.service");
+...
+const Services = {};
+...
+Services.LessonService = LessonService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/lesson.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Lesson = sequelize.define("lesson", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        fk_catcomp_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "catcomp",
+                key: "id",
+            },
+        },
+    });
+
+    return Lesson;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.lessons = require("./lesson.model")(sequelize, Sequelize);
+...
+// lesson => catcomp
+db.catcomp.hasMany(db.lessons, { foreignKey: "fk_catcomp_id" });
+db.lessons.belongsTo(db.catcomp, { foreignKey: "fk_catcomp_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.lesson.controllers.js"
+const db = require("../models");
+const Lesson = db.lessons;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les leçons de la base de données
+exports.findAll = (req, res) => {
+    const nom = req.query.nom;
+    const fk_catcomp_id = req.query.fk_catcomp_id;
+
+    var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+    var fkCondition = fk_catcomp_id
+        ? { fk_catcomp_id: { [Op.like]: `${fk_catcomp_id}` } }
+        : null;
+
+    var condition = nameCondition ? nameCondition : fkCondition;
+
+    Lesson.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des leçons.",
+            });
+        });
+};
+
+// Trouver une seule leçon avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Lesson.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la leçon avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.lesson.routes.js"
+module.exports = app => {
+    const lessons = require("../controllers/alecol.lesson.controllers.js");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les leçons
+    router.get("/", lessons.findAll);
+
+    // Récupérer une seule leçon avec id
+    router.get("/:id", lessons.findOne);
+
+    app.use('/api/lessons', router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.lesson.routes")(app);
+...
+```

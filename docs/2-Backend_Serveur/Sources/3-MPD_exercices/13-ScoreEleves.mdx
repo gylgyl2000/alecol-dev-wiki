@@ -1,0 +1,167 @@
+# Score élèves
+
+## Service
+
+```js title="./src/services/alecol.score_eleves.service.js"
+import http from "../http-common";
+
+class ScoreElevesDataService {
+    getAll() {
+        return http.get("/scoreEleves");
+    }
+
+    get(id) {
+        return http.get(`/scoreEleves/${id}`);
+    }
+
+    findByEleveId(fk_eleve_id) {
+        return http.get(`/scoreEleves?fk_eleve_id=${fk_eleve_id}`);
+    }
+
+    findByExoId(fk_exercices_id) {
+        return http.get(`/scoreEleves?fk_exercices_id=${fk_exercices_id}`);
+    }
+}
+
+export default new ScoreElevesDataService();
+```
+
+```js title="./src/services/index.js"
+const ScoreElevesService = require("./alecol.score_eleves.service");
+...
+const Services = {};
+...
+Services.ScoreElevesService = ScoreElevesService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/score_eleves.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const ScoreEleves = sequelize.define("score_eleves", {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+        },
+        FK_eleve_id: {
+            type: Sequelize.INTEGER,
+            references: {
+            model: "eleve",
+            key: "id",
+            },
+        },
+        FK_exercices_id: {
+            type: Sequelize.STRING,
+            references: {
+            model: "exercices",
+            key: "pk_exo_id",
+            },
+        },
+        nb_iter: {
+            type: Sequelize.INTEGER,
+        },
+        last_score: {
+            type: Sequelize.FLOAT,
+        },
+        last_time: {
+            type: Sequelize.TIME,
+        },
+        best_score: {
+            type: Sequelize.FLOAT,
+        },
+        best_time: {
+            type: Sequelize.TIME,
+        },
+    });
+  
+    return ScoreEleves;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.score_eleves = require("./score_eleves.model")(sequelize, Sequelize);
+...
+// score_eleves => eleve
+db.eleves.hasMany(db.score_eleves, { foreignKey: "FK_eleve_id" });
+db.score_eleves.belongsTo(db.eleves, { foreignKey: "FK_eleve_id" });
+
+// score_eleves => exercices
+db.exercices.hasMany(db.score_eleves, { foreignKey: "FK_exercices_id" });
+db.score_eleves.belongsTo(db.exercices, { foreignKey: "FK_exercices_id" })
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.score_eleves.controllers.js"
+const db = require("../models");
+const Score = db.score_trous;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les scores de la base de données
+exports.findAll = (req, res) => {
+    const eleveId = req.query.fk_eleve_id;
+
+    var condition = eleveId ? { FK_eleve_id: { [Op.like]: `${eleveId}` } } : null;
+
+    Score.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des scores.",
+            });
+        });
+};
+
+// Trouver un seul score avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Score.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération du score avec l'id=" + id,
+            });
+        });
+};
+
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.score_eleves.routes.js"
+module.exports = (app) => {
+    const score_eleves = require("../controllers/alecol.score_eleves.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les scores
+    router.get("/", score_eleves.findAll);
+
+    // Récupérer un seul score avec id
+    router.get("/:id", score_eleves.findOne);
+
+    app.use("/api/scoreEleves", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.score_eleves.routes")(app);
+...
+```

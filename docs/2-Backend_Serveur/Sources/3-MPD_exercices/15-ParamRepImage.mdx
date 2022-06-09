@@ -1,0 +1,162 @@
+# Paramètres réponse image
+
+## Service
+
+```js title="./src/services/alecol.param_rep_image.service.js"
+import http from "../http-common";
+
+class ParamRepImageDataService {
+    getAll() {
+        return http.get("/ParamRepImage");
+    }
+
+    get(id) {
+        return http.get(`/ParamRepImage/${id}`);
+    }
+
+    findByExoId(fk_exercice_id) {
+        return http.get(`/ParamRepImage?fk_exercice_id=${fk_exercice_id}`);
+    }
+}
+
+export default new ParamRepImageDataService();
+```
+
+```js title="./src/services/index.js"
+const ParamRepImageService = require("./alecol.param_rep_image.service");
+...
+const Services = {};
+...
+Services.ParamRepImageService = ParamRepImageService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/param_rep_image.model.js"
+module.exports = (sequelize, Sequelize) => {
+        const ParamRep_Image = sequelize.define("param_rep_image", {
+        FK_exercice_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "exercices",
+                key: "pk_exo_id",
+            },
+        },
+        FK_reponse_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "type_exo",
+                key: "id",
+            },
+        },
+        FK_image_id: {
+            type: Sequelize.INTEGER,
+            references: {
+                model: "images",
+                key: "id",
+            },
+        },
+        nombre: {
+            type: Sequelize.INTEGER,
+        },
+        taille: {
+            type: Sequelize.INTEGER,
+        },
+    });
+    
+    return ParamRep_Image;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.param_rep_image = require("./param_rep_image.model")(sequelize, Sequelize);
+...
+// param_rep_image => exercices
+db.exercices.hasMany(db.param_rep_image, { foreignKey: "FK_exercice_id" });
+db.param_rep_image.belongsTo(db.exercices, { foreignKey: "FK_exercice_id" });
+
+// param_rep_image => images
+db.images.hasMany(db.param_rep_image, { foreignKey: "FK_image_id" });
+db.param_rep_image.belongsTo(db.images, { foreignKey: "FK_image_id" });
+
+// param_rep_image => type_exo
+db.type_exercice.hasMany(db.param_rep_image, { foreignKey: "FK_reponse_id" });
+db.param_rep_image.belongsTo(db.type_exercice, { foreignKey: "FK_reponse_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.param_rep_image.controllers.js"
+const db = require("../models");
+const ParamRepImage = db.param_rep_image;
+const Op = db.Sequelize.Op;
+
+// Récupérer tous les paramètres réponse image de la base de données
+exports.findAll = (req, res) => {
+    const exerciceId = req.query.fk_exercice_id;
+
+    var condition = exerciceId ? { FK_exercice_id: { [Op.like]: `${exerciceId}` } } : null;
+
+    ParamRepImage.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des paramètres réponse image.",
+            });
+        });
+};
+
+// Trouver un seul paramètre réponse image avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    ParamRepImage.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération du paramètre réponse image avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.param_rep_image.routes.js"
+module.exports = (app) => {
+    const param_rep_image = require("../controllers/alecol.param_rep_image.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les paramètres réponse image
+    router.get("/", param_rep_image.findAll);
+
+    // Récupérer un seul paramètre réponse image avec id
+    router.get("/:id", param_rep_image.findOne);
+
+    app.use("/api/paramRepImage", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.param_rep_image.routes")(app);
+...
+```

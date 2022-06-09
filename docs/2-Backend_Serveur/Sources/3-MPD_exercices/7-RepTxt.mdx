@@ -1,0 +1,131 @@
+# Réponse texte
+
+## Service
+
+```js title="./src/services/alecol.Rep_txt.service.js"
+import http from "../http-common";
+
+class ReponsesTxtDataService {
+    getAll() {
+        return http.get("/reponsesTxt");
+    }
+
+    get(id) {
+        return http.get(`/reponsesTxt/${id}`);
+    }
+
+    findByNom(Reponse_Text) {
+        return http.get(`/reponsesTxt?Reponse_Text=${Reponse_Text}`);
+    }
+}
+
+export default new ReponsesTxtDataService();
+```
+
+```js title="./src/services/index.js"
+const ReponsesTxtService = require("./alecol.Rep_txt.service");
+...
+const Services = {};
+...
+Services.RepTxtService = ReponsesTxtService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/Rep_txt.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Rep_txt = sequelize.define("rep_txt", {
+        ID: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+        },
+        Reponse_Text: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return Rep_txt;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.Rep_txt = require("./Rep_txt.model")(sequelize, Sequelize);
+...
+
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.Rep_txt.controllers.js"
+const db = require("../models");
+const Reponse = db.Rep_txt;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses texte de la base de données
+exports.findAll = (req, res) => {
+    const repText = req.query.Reponse_Text;
+
+    var condition = repText
+        ? { Reponse_Text: { [Op.like]: `${repText}` } }
+        : null;
+
+    Reponse.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des réponses texte.",
+            });
+        });
+};
+
+// Trouver une seule réponse texte avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Reponse.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse texte avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.Rep_txt.routes.js"
+module.exports = (app) => {
+    const Rep_txt = require("../controllers/alecol.Rep_txt.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les réponses texte
+    router.get("/", Rep_txt.findAll);
+
+    // Récupérer une seule réponse texte avec id
+    router.get("/:id", Rep_txt.findOne);
+
+    app.use("/api/reponsesTxt", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.Rep_txt.routes")(app);
+...
+```

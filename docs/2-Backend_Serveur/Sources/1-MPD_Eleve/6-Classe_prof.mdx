@@ -1,0 +1,45 @@
+# Classe => Prof
+
+## Modèle
+
+```js title="./src/models/classe_prof.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const ClasseProf = sequelize.define("classe_prof", {
+        fk_classe_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "classe",
+                key: "id",
+            },
+        },
+        fk_prof_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "professeur",
+                key: "id",
+            },
+        },
+    });
+
+    return ClasseProf;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.classe_prof = require("./classe_prof.model")(sequelize, Sequelize);
+...
+db.classes.belongsToMany(db.professeurs, {
+  through: "classe_prof",
+  foreignKey: "classe_id",
+});
+db.professeurs.belongsToMany(db.classes, {
+  through: "classe_prof",
+  foreignKey: "professeur_id",
+});
+...
+```
+
+-----

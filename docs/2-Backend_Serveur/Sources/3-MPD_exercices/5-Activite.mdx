@@ -1,0 +1,197 @@
+# Activité
+
+## Service
+
+```js title="./src/services/alecol.activite_clnt.service.js"
+import http from "../http-common";
+
+class ActiviteDataService {
+    getAll() {
+        return http.get("/activite");
+    }
+
+    get(id) {
+        return http.get(`/activite/${id}`);
+    }
+
+    findByActivite(pk_activite_id) {
+        return http.get(`/activite?pk_activite_id=${pk_activite_id}`);
+    }
+
+    findByLesson(lessonId) {
+        return http.get(`/activite?lessonid=${lessonId}`);
+    }
+}
+
+export default new ActiviteDataService();
+```
+
+```js title="./src/services/index.js"
+const ActiviteService = require("./alecol.activite_clnt.service");
+...
+const Services = {};
+...
+Services.ActiviteService = ActiviteService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/activite_clnt.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Activite = sequelize.define("activite_clnt", {
+        nom: {
+            type: Sequelize.STRING,
+        },
+        description: {
+            type: Sequelize.STRING,
+        },
+        objectif: {
+            type: Sequelize.STRING,
+        },
+        consigne: {
+            type: Sequelize.STRING,
+        },
+        typrep: {
+            type: Sequelize.STRING,
+            references: {
+                model: "type_exo",
+                key: "id",
+            },
+        },
+        num_activite: {
+            type: Sequelize.INTEGER,
+        },
+        fk_classe_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "classe",
+                key: "id",
+            },
+        },
+        fk_lesson_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "lesson",
+                key: "id",
+            },
+        },
+        fk_natureactiv_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "natureactiv",
+                key: "id",
+            },
+        },
+        pk_activite_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+    });
+
+    return Activite;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.activite = require("./activite_clnt.model")(sequelize, Sequelize);
+...
+// activite => classe
+db.classes.hasMany(db.activite, { foreignKey: "fk_classe_id" });
+db.activite.belongsTo(db.classes, { foreignKey: "fk_classe_id" });
+
+// activite => lesson
+db.lessons.hasMany(db.activite, { foreignKey: "fk_lesson_id" });
+db.activite.belongsTo(db.lessons, { foreignKey: "fk_lesson_id" });
+
+// activite => type_exo
+db.type_exercice.hasMany(db.activite, { foreignKey: "typrep" });
+db.activite.belongsTo(db.type_exercice, { foreignKey: "typrep" });
+
+// activite => natureactiv
+db.natureActiv.hasMany(db.activite, { foreignKey: "fk_natureactiv_id" });
+db.activite.belongsTo(db.natureActiv, { foreignKey: "fk_natureactiv_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.phaseapp.controllers.js"
+const db = require("../models");
+const Activite = db.activite;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les activités de la base de données
+exports.findAll = (req, res) => {
+    const activiteid = req.query.pk_activite_id;
+    const lessonid = req.query.lessonid;
+
+    var nameCondition = activiteid
+        ? { pk_activite_id: { [Op.like]: `${activiteid}` } }
+        : null;
+
+    var fkCondition = lessonid
+        ? { fk_lesson_id: { [Op.like]: `${lessonid}` } }
+        : null;
+
+    var condition = nameCondition || fkCondition;
+
+    Activite.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des activités.",
+            });
+        });
+};
+
+// Trouver une seule activité avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Activite.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de l'activité avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.phaseapp.routes.js"
+module.exports = (app) => {
+    const activite = require("../controllers/alecol.activite_clnt.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les activités
+    router.get("/", activite.findAll);
+
+    // Récupérer une seule activité avec id
+    router.get("/:id", activite.findOne);
+
+    app.use("/api/activite", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.activite_clnt.routes")(app);
+...
+```

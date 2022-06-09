@@ -1,0 +1,144 @@
+# Compétence spécifique
+
+## Service
+
+```js title="./src/services/alecol.compspec.service.js"
+import http from "../http-common";
+
+class CompSpecDataService {
+    getAll() {
+        return http.get("/compspec");
+    }
+
+    get(id) {
+        return http.get(`/compspec/${id}`);
+    }
+
+    findByCompGenId(fk_compgen_id) {
+        return http.get(`/compspec?fk_compgen_id=${fk_compgen_id}`);
+    }
+}
+
+export default new CompSpecDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const CompSpecService = require("./alecol.compspec.service");
+...
+const Services = {};
+...
+Services.CompSpecService = CompSpecService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/compspec.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const CompSpec = sequelize.define("compgen_has_compspec", {
+        fk_compgen_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "classe_catcomp_has_compgen",
+                key: "id",
+            },
+        },
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        description: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return CompSpec;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.compspec = require("./compspec.model")(sequelize, Sequelize);
+...
+// compgen_has_compspec => classe_catcomp_has_compgen
+db.compgen.hasMany(db.compspec, { foreignKey: "fk_compgen_id" });
+db.compspec.belongsTo(db.compgen, { foreignKey: "fk_compgen_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.compspe.controllers.js"
+const db = require("../models");
+const CompSpec = db.compspec;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les compétences spécifiques de la base de données
+exports.findAll = (req, res) => {
+    const nom = req.query.nom;
+
+    var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+
+    var condition = nameCondition;
+
+    CompSpec.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des compétences spécifiques.",
+            });
+        });
+};
+
+// Trouver une seule compétence spécifique avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    CompSpec.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la compétence spécifique avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.compgen.routes.js"
+module.exports = (app) => {
+    const compspec = require("../controllers/alecol.compspec.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les compétences spécifiques
+    router.get("/", compspec.findAll);
+
+    // Récupérer une seule compétence spécifique avec id
+    router.get("/:id", compspec.findOne);
+
+    app.use("/api/compspec", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.compspec.routes")(app);
+...
+```

@@ -1,0 +1,143 @@
+# Réponses trous
+
+## Service
+
+```js title="./src/services/alecol.reponse_trous.service.js"
+import http from "../http-common";
+
+class ReponseTrousDataService {
+    getAll() {
+        return http.get("/reponsesTrous");
+    }
+
+    get(id) {
+        return http.get(`/reponsesTrous/${id}`);
+    }
+
+    findByExoId(fk_exo_id) {
+        return http.get(`/reponsesTrous?fk_exo_id=${fk_exo_id}`);
+    }
+}
+
+export default new ReponseTrousDataService();
+```
+
+```js title="./src/services/index.js"
+const ReponseTrousService = require("./alecol.reponse_trous.service");
+...
+const Services = {};
+...
+Services.ReponseTrousService = ReponseTrousService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/reponse_trous.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Reponses_trous = sequelize.define("reponses_trous", {
+        FK_Exo_ID: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "exercices",
+                key: "pk_exo_id",
+            },
+        },
+        Type_Rep: {
+            type: Sequelize.STRING,
+        },
+        FK_Rep_ID: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+        },
+        position: {
+            type: Sequelize.INTEGER,
+        },
+    });
+
+    return Reponses_trous;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.reponse_trous = require("./reponse_trous.model")(sequelize, Sequelize);
+...
+// reponses_trous => exercices
+db.exercices.hasMany(db.reponse_trous, { foreignKey: "FK_Exo_ID" });
+db.reponse_trous.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.reponse_trous.controllers.js"
+const db = require("../models");
+const Reponse = db.reponse_trous;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses trous de la base de données
+exports.findAll = (req, res) => {
+    const exoId = req.query.fk_exo_id;
+
+    var condition = exoId ? { FK_Exo_ID: { [Op.like]: `${exoId}` } } : null;
+
+    Reponse.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des réponses trous.",
+            });
+        });
+};
+
+// Trouver une seule réponse trous avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Reponse.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse trous avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.reponse_trous.routes.js"
+module.exports = (app) => {
+    const reponse_trous = require("../controllers/alecol.reponse_trous.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les réponses trous
+    router.get("/", reponse_trous.findAll);
+
+    // Récupérer une seule réponse trous avec id
+    router.get("/:id", reponse_trous.findOne);
+
+    app.use("/api/reponsesTrous", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.reponse_paires.routes")(app);
+...
+```

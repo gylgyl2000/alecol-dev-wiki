@@ -1,0 +1,203 @@
+# Parent
+
+## Service
+
+```js title="./src/services/alecol.parent.service.js"
+import http from "../http-common";
+
+class ParentDataService {
+    getAll() {
+        return http.get("/parent");
+    }
+
+    get(id) {
+        return http.get(`/parent/${id}`);
+    }
+
+    post(data) {
+        return http.post("/parent", data);
+    }
+
+    findByNom(nom) {
+        return http.get(`/parent?nom=${nom}`);
+    }
+
+    findByEmail(email) {
+        return http.get(`/parent?email=${email}`);
+    }
+
+    login(data) {
+        return http.post("/parent/login", data);
+    }
+
+    getUserFromToken(token) {
+        return http.post("/parent/getUser", token);
+    }
+}
+
+export default new ParentDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const ParentService = require("./alecol.parent.service");
+...
+const Services = {};
+...
+Services.ParentService = ParentService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/parent.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Parent = sequelize.define("parent", {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        prenom: {
+            type: Sequelize.STRING,
+        },
+        email: {
+            type: Sequelize.STRING,
+        },
+        password: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return Parent;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.parents = require("./parent.model")(sequelize, Sequelize);
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.parent.controllers.js"
+const bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+
+const db = require("../models");
+const Parent = db.parents;
+const Op = db.Sequelize.Op;
+
+// Récupérer tous les parents de la base de données.
+exports.findAll = (req, res) => {
+    const email = req.query.email;
+
+    var condition = email ? { email: { [Op.like]: `${email}` } } : null;
+
+    Parent.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des Parents.",
+            });
+        });
+};
+
+// Trouver un seul parent avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Parent.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération du parent avec l'id=" + id,
+            });
+        });
+};
+
+exports.postOne = (req, res) => {
+    let data = req.body;
+
+    data = { ...data};
+
+    Parent.create(data)
+        .then(() => {
+            res.send("Inscription réussi");
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur d'enregistrement",
+            });
+        });
+};
+
+exports.loginParent = (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    var condition = email ? { email: { [Op.like]: `${email}` } } : null;
+
+    Parent.findAll({ where: condition }).then((data) => {
+        if (
+            data[0].email === email &&
+            bcrypt.compareSync(password, data[0].password)
+        ) {
+            const token = jwt.sign({ id: data[0].id, nom: data[0].nom }, "MA_CLE", {
+                expiresIn: "1h",
+            });
+
+            res.status(200).send({ token: token });
+        }
+    });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.parent.routes.js"
+const checkAuth = require("../middleware/auth_middleware");
+
+module.exports = (app) => {
+    const parents = require("../controllers/alecol.parent.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les parents
+    router.get("/", parents.findAll);
+
+    // Poster un parent
+    router.post("/", parents.postOne);
+
+    // Récupérer un seul parent avec un id
+    router.get("/:id", parents.findOne);
+
+    router.post("/login", parents.loginParent);
+
+    router.post("/getUser", checkAuth);
+
+    app.use("/api/parent", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.parent.routes")(app);
+...
+```

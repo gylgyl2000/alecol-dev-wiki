@@ -1,0 +1,40 @@
+# Compétence spécifique par activité
+
+## Modèle
+
+```js title="./src/models/activite_requiert_compspec.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const ActiviteRequiert_CompSpec = sequelize.define("activite_requiert_compspec", {
+        fk_activite_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "activite_clnt",
+                key: "pk_activite_id",
+            },
+        },
+        fk_compspec_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "compgen_has_compspec",
+                key: "id",
+            },
+        },
+    });
+
+    return ActiviteRequiert_CompSpec;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.activiteRequiert_CompSpec = require("./activite_requiert_compspec.model")(sequelize, Sequelize);
+...
+// activite <=> compspec
+db.compspec.belongsToMany(db.activite, {through: "activite_requiert_compspec", foreignKey: "compgen_has_compspec_id",});
+db.activite.belongsToMany(db.compspec, {through: "activite_requiert_compspec", foreignKey: "activite_clnt_pk_activite_id",});
+...
+```
+
+-----

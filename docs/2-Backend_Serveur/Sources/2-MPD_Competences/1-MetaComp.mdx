@@ -1,0 +1,142 @@
+# Méta compétence
+
+## Service
+
+```js title="./src/services/alecol.metacomp.service.js"
+import http from "../http-common";
+
+class MetaCompDataService {
+    getAll() {
+        return http.get("/metacomp");
+    }
+
+    get(id) {
+        return http.get(`/metacomp/${id}`);
+    }
+
+    findByMatiereId(fk_matiere_id) {
+        return http.get(`/metacomp?fk_matiere_id=${fk_matiere_id}`);
+    }
+}
+
+export default new MetaCompDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const MetaCompService = require("./alecol.metacomp.service");
+...
+const Services = {};
+...
+Services.MetaCompService = MetaCompService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/metacomp.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const MetaComp = sequelize.define("metacomp", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        fk_matiere_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "matiere",
+                key: "id",
+            },
+        },
+    });
+
+    return MetaComp;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.metacomp = require("./metacomp.model")(sequelize, Sequelize);
+...
+db.matieres.hasMany(db.metacomp, { foreignKey: "fk_matiere_id" });
+db.metacomp.belongsTo(db.matieres, { foreignKey: "fk_matiere_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.metacomp.controllers.js"
+const db = require("../models");
+const Metacomp = db.metacomp;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les méta compétences de la base de données
+exports.findAll = (req, res) => {
+    const fk_matiere_id = req.query.fk_matiere_id;
+
+    var nameCondition = fk_matiere_id
+        ? { fk_matiere_id: { [Op.like]: `${fk_matiere_id}` } }
+        : null;
+
+    var condition = nameCondition;
+
+    Metacomp.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des Méta compétences.",
+            });
+        });
+};
+
+// Trouver une seule méta compétence avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Metacomp.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la méta compétence avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.metacomp.routes.js"
+module.exports = (app) => {
+    const metacomp = require("../controllers/alecol.metacomp.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les méta compétences
+    router.get("/", metacomp.findAll);
+
+    // Récupérer une seule méta compétence avec id
+    router.get("/:id", metacomp.findOne);
+
+    app.use("/api/metacomp", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.metacomp.routes")(app);
+...
+```

@@ -1,0 +1,45 @@
+# Parent => enfant
+
+## Modèle
+
+```js title="./src/models/parent_has_enfant.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const ParentHasEnfant = sequelize.define("parent_has_enfant", {
+        fk_parent_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "parent",
+                key: "id",
+            },
+        },
+        fk_eleve_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "eleve",
+                key: "id",
+            },
+        },
+    });
+
+    return ParentHasEnfant;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.parentHasEnfant = require("./parent_has_enfant.model")(sequelize, Sequelize);
+...
+db.parents.belongsToMany(db.eleves, {
+  through: "parent_has_enfant",
+  foreignKey: "parent_id",
+});
+db.eleves.belongsToMany(db.parents, {
+  through: "parent_has_enfant",
+  foreignKey: "eleve_id",
+});
+...
+```
+
+-----

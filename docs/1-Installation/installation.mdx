@@ -1,0 +1,68 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+**ReactJS - NodeJS - MySQL**
+
+-----
+
+## Cloner le dépôt Alécol
+
+```shell
+git clone https://github.com/Frederic7101/RepoAlecol.git
+```
+
+-----
+
+## Installer la base de données
+
+Le fichier source se trouve dans le dossier suivant :
+`./RepoAlecol/documents/scripts/creation_insertion.sql`
+
+Créer une base `alecol_db`.
+
+Importer la base `creation_insertion.sql`.
+
+-----
+
+## Installer les dépendances
+
+```shell
+cd RepoAlecol
+npm install
+```
+
+-----
+
+## Démarrer le serveur MySQL
+
+```shell
+sudo mysql -u root -p
+```
+
+-----
+
+## Lancer le serveur backend
+
+```shell
+cd RepoAlecol
+node server
+```
+
+http://localhost:8082
+
+-----
+
+## Lancer l'application frontend
+
+```shell
+cd RepoAlecol
+pm start
+```
+
+http://localhost:8083

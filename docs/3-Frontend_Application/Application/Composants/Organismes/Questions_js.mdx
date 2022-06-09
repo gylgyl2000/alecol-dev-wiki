@@ -1,0 +1,123 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Questions
+
+```js title="./src/Components/organisms/question/Questions.js"
+import React, { useState, useContext, useEffect, useCallback } from "react";
+import { ExerciceContext } from "../../../contexts/ExerciceContext";
+import Steps from "../../molecules/steps/Steps";
+import { removeLines } from "../../../js/pairLinksController";
+
+import StatusBar from "../../molecules/statusBar/StatusBar";
+import { useLocation } from "react-router";
+import "./Style.css";
+
+/**
+ * Récupère la liste des questions de l'exercice ainsi que le type d'exercice
+ *
+ * @module Question
+ * @component
+ *@category organisms
+ */
+
+const Question = () => {
+  /**
+   *
+   * @typedef {Array} exercice
+   * @property {Number} exercice l'id de l'exercice sélectionné
+   * @property {Function} setExercice initialise l'exercice sélectionné
+   */
+
+  /**
+   * @type {exercice}
+   */
+  const [Exercice, setExercice] = useContext(ExerciceContext);
+
+  /**
+   *
+   * @typedef {Array} Questions
+   * @property {Array} questions la liste des questions
+   * @property {Function} setQuestions initialise la liste des questions
+   */
+
+  /**
+   * @type {Questions}
+   */
+  const [questions, setQuestions] = useState([]);
+
+  /**
+   *
+   * @typedef {Array} ExoType
+   * @property {String} exoType le type de l'exercice
+   * @property {Function} setExoType définit le type de l'exercice
+   */
+
+  /**
+   * @type {ExoType}
+   */
+  const [exoType, setExoType] = useState();
+
+  /**
+   * cet état va controller la réinitialisation de l'exercice
+   * @type {Boolean}
+   */
+
+  const [customKey, setCustomKey] = useState(false);
+
+  /**
+   *
+   * @typedef {Array} Consigne
+   * @property {String} consigne la consigne de l'exercice
+   * @property {Function} setConsigne définit la consigne de l'exercice
+   */
+
+  /**
+   * @type {Consigne}
+   */
+  const [consigne, setConsigne] = useState();
+
+  const location = useLocation();
+
+  /**
+   * récupère le type de l'exercice sélectionné
+   * @function getExoType
+   */
+
+  const getExoType = () => {
+    setExoType(Exercice.activite_clnt.type_exercice.type_exercice);
+  };
+
+  /**
+   * ce code est exécuté une fois que l'état de réinitialisation change de valeur
+   */
+
+  useEffect(() => {
+    setQuestions([]);
+    removeLines();
+
+    setQuestions(Array.from(location.state.exercices));
+    getExoType();
+  }, [customKey]);
+
+  return (
+    <div className="questions__container">
+      <StatusBar />
+
+      <Steps
+        questions={questions}
+        consigne={consigne}
+        type={exoType}
+        customKey={customKey}
+        reset={setCustomKey}
+      />
+    </div>
+  );
+};
+
+export default Question;
+```

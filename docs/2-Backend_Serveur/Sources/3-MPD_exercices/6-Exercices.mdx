@@ -1,0 +1,229 @@
+# Exercices
+
+## Service
+
+```js title="./src/services/alecol.exercices.service.js"
+import http from "../http-common";
+
+class ExerciceDataService {
+    getAll() {
+        return http.get("/exercices");
+    }
+
+    get(id) {
+        return http.get(`/exercices/${id}`);
+    }
+
+    findByExoId(pk_exo_id) {
+        return http.get(`/exercices/${pk_exo_id}`);
+    }
+
+    findByActiviteId(fk_activite_id) {
+        return http.get(`/exercices?fk_activite_id=${fk_activite_id}`);
+    }
+
+    findByMatiereName(matiereName) {
+        return http.get(`/exercices?matiereName=${matiereName}`);
+    }
+}
+
+export default new ExerciceDataService();
+```
+
+```js title="./src/services/index.js"
+const ExerciceService = require("./alecol.exercices.service");
+...
+const Services = {};
+...
+Services.ExerciceService = ExerciceService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/exercices.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Exercice = sequelize.define("exercices", {
+        actif: {
+            type: Sequelize.BOOLEAN,
+        },
+        libelle: {
+            type: Sequelize.STRING,
+        },
+        question: {
+            type: Sequelize.STRING,
+        },
+        nb_possible_rep: {
+            type: Sequelize.INTEGER,
+        },
+        nb_bonnes_rep: {
+            type: Sequelize.INTEGER,
+        },
+        fk_activite_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "activite_clnt",
+                key: "pk_activite_id",
+            },
+        },
+        num_question: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+        },
+        pk_exo_id: {
+            type: Sequelize.STRING,
+        },
+        element_id: {
+            type: Sequelize.INTEGER,
+            references: {
+                model: "elements",
+                key: "id",
+            },
+        },
+    });
+
+    return Exercice;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.exercices = require("./exercices.model")(sequelize, Sequelize);
+...
+// exercices => activite
+db.activite.hasMany(db.exercices, { foreignKey: "fk_activite_id" });
+db.exercices.belongsTo(db.activite, { foreignKey: "fk_activite_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.exercice.controllers.js"
+const db = require("../models");
+const Exercice = db.exercices;
+const Activite = db.activite;
+const Lesson = db.lessons;
+const CatComp = db.catcomp;
+const MetaComp = db.metacomp;
+const Matiere = db.matieres;
+const Type_Exercice = db.type_exercice;
+
+const Op = db.Sequelize.Op;
+
+// Récupérer tous les exercices de la base de données
+exports.findAll = (req, res) => {
+    const exoid = req.query.pk_exo_id;
+    const activiteid = req.query.fk_activite_id;
+    const matiereName = req.query.matiereName;
+
+    var pkCondition = exoid ? { pk_exo_id: { [Op.eq]: `${exoid}` } } : null;
+    var fkCondition = activiteid
+        ? { fk_activite_id: { [Op.like]: `${activiteid}` } }
+        : null;
+
+    var condition = pkCondition || fkCondition;
+
+    Exercice.findAll({
+        include: [
+            {
+                model: Activite,
+                required: true,
+                include: [
+                    {
+                        model: Type_Exercice,
+                        attributes: ["id", "TypeExo"],
+                        required: true,
+                    },
+                    {
+                        model: Lesson,
+                        required: true,
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: CatComp,
+                                required: true,
+                                attributes: ["id"],
+                                include: [
+                                    {
+                                        model: MetaComp,
+                                        required: true,
+                                        attributes: ["id"],
+                                        include: [
+                                            {
+                                                model: Matiere,
+                                                required: true,
+                                                attributes: ["id"],
+                                                where: {
+                                                    nom: { [Op.like]: matiereName },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des exercices.",
+            });
+        });
+};
+
+// Trouver un seul exercice avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    var pkCondition = id ? { pk_exo_id: { [Op.like]: `${id}` } } : null;
+
+    Exercice.findAll({ where: pkCondition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de l'exercice avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.exercice.routes.js"
+module.exports = app => {
+    const exercices = require("../controllers/alecol.exercice.controllers.js");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les exercices
+    router.get("/", exercices.findAll);
+
+    // Récupérer un seul exercice avec id
+    router.get("/:id", exercices.findOne);
+
+    app.use('/api/exercices', router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.exercice.routes")(app);
+...
+```

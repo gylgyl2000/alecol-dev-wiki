@@ -1,0 +1,40 @@
+# Nature d'activité par phase d'apprentissage
+
+## Modèle
+
+```js title="./src/models/natureactiv_phaseapp.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const NatureActiv_PhaseApp = sequelize.define("natureactiv_phaseapp", {
+        fk_phaseapp_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "phaseapp",
+                key: "id",
+            },
+        },
+        fk_natureactiv_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "natureactiv",
+                key: "id",
+            },
+        },
+    });
+
+    return NatureActiv_PhaseApp;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.natureActiv_phaseApp = require("./natureactiv_phaseapp.model")(sequelize, Sequelize);
+...
+// natureactiv <=> phaseapp
+db.phaseApp.belongsToMany(db.natureActiv, {through: "natureactiv_phaseapp", foreignKey: "phaseapp_id",});
+db.natureActiv.belongsToMany(db.phaseApp, {through: "natureactiv_phaseapp", foreignKey: "natureactiv_id",});
+...
+```
+
+-----

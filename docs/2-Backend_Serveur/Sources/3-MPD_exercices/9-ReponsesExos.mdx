@@ -1,0 +1,200 @@
+# Réponses possibles
+
+## Service
+
+```js title="./src/services/alecol.reponse_exos.service.js"
+import http from "../http-common";
+
+class ReponseExosDataService {
+    getAll() {
+        console.log("GetAll");
+        return http.get("/reponsesExos");
+    }
+
+    get(id) {
+        console.log("Get");
+        return http.get(`/reponsesExos/${id}`);
+    }
+
+    getCountReponses(exoid) {
+        console.log("getCountReponses");
+        return http.get(`/reponsesExos?fk_exo_id=${exoid}&count=${true}`);
+    }
+
+    findByExoId(fk_exo_id) {
+        console.log("FindByNom");
+        return http.get(`/reponsesExos?fk_exo_id=${fk_exo_id}`);
+    }
+}
+
+export default new ReponseExosDataService();
+```
+
+```js title="./src/services/index.js"
+const ReponseExosService = require("./alecol.reponse_exos.service");
+...
+const Services = {};
+...
+Services.ReponseExosService = ReponseExosService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/reponse_exos.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Reponses_exos = sequelize.define("reponses_exos", {
+        fk_exo_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "exercices",
+                key: "pk_exo_id",
+            },
+        },
+        Type: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        fk_rep_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        ValRep: {
+            type: Sequelize.INTEGER,
+        },
+        type_exercice: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "type_exo",
+                key: "id",
+            },
+        },
+    });
+
+    return Reponses_exos;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.reponse_exos = require("./reponse_exos.model")(sequelize, Sequelize);
+...
+// reponses_exos => exercices
+db.exercices.hasMany(db.reponse_exos, { foreignKey: "fk_exo_id" });
+db.reponse_exos.belongsTo(db.exercices, { foreignKey: "fk_exo_id" });
+
+// reponses_exos => type_exo
+db.type_exercice.hasMany(db.reponse_exos, { foreignKey: "type_exercice" });
+db.reponse_exos.belongsTo(db.type_exercice, { foreignKey: "type_exercice" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.reponse_exos.controllers.js"
+const db = require("../models");
+const Reponse = db.reponse_exos;
+const RepText = db.Rep_txt;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses possibles de la base de données
+exports.findAll = (req, res) => {
+  const exoId = req.query.fk_exo_id;
+
+  var condition = exoId ? { fk_exo_id: { [Op.like]: `${exoId}` } } : null;
+
+  var cond1 = {
+    // include: [{ model: RepText, required: true, constraints: false }],
+    where: condition,
+  };
+
+  var cond2 = {
+    //include: [{ model: RepText, required: true, constraints: false }],
+    where: {
+      [Op.and]: [condition, { ValRep: { [Op.eq]: true } }],
+    },
+  };
+
+  var cond = req.query.count ? cond2 : cond1;
+
+  Reponse.findAll(cond)
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Une erreur s'est produite lors de la récupération des réponses possibles",
+      });
+    });
+};
+
+exports.findCountOfCorrectReponses = (req, res) => {
+    const pk_exo_id = req.query.exoid;
+
+    var condition = pk_exo_id
+        ? { fk_exo_id: { [Op.like]: `${pk_exo_id}` } }
+        : null;
+
+    condition = condition && { ValRep: { [Op.like]: true } };
+
+    Reponse.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((error) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse possible avec l'id=" + pk_exo_id,
+            });
+        });
+};
+// Trouver une seule réponse possible avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Reponse.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse possible avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.reponse_exos.routes.js"
+module.exports = (app) => {
+    const reponse_exos = require("../controllers/alecol.reponse_exos.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les réponses possibles
+    router.get("/", reponse_exos.findAll);
+
+    // Récupérer une seule réponse possible avec id
+    router.get("/:id", reponse_exos.findOne);
+
+    router.get("/:exoid", reponse_exos.findCountOfCorrectReponses);
+
+    app.use("/api/reponsesExos", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.reponse_exos.routes")(app);
+...
+```

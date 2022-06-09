@@ -1,0 +1,133 @@
+# Phase d'apprentissage
+
+## Service
+
+```js title="./src/services/alecol.phaseapp.service.js"
+import http from "../http-common";
+
+class PhaseAppDataService {
+    getAll() {
+        return http.get("/phaseapp");
+    }
+
+    get(id) {
+        return http.get(`/phaseapp/${id}`);
+    }
+
+    findByNom(nom) {
+        return http.get(`/phaseapp?nom=${nom}`);
+    }
+}
+
+export default new PhaseAppDataService();
+```
+
+```js title="./src/services/index.js"
+const PhaseAppService = require("./alecol.phaseapp.service");
+...
+const Services = {};
+...
+Services.PhaseAppService = PhaseAppService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/phaseapp.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const PhaseApp = sequelize.define("phaseapp", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        description: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return PhaseApp;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.phaseApp = require("./phaseapp.model")(sequelize, Sequelize);
+...
+
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.phaseapp.controllers.js"
+const db = require("../models");
+const PhaseApp = db.phaseApp;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les phases d'apprentissage de la base de données
+exports.findAll = (req, res) => {
+    const nom = req.query.nom;
+
+    var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+
+    var condition = nameCondition;
+
+    PhaseApp.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des phases d'apprentissage.",
+            });
+        });
+};
+
+// Trouver une seule phase d'apprentissage avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    PhaseApp.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la phase d'apprentissage avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.phaseapp.routes.js"
+module.exports = (app) => {
+    const phaseapp = require("../controllers/alecol.phaseapp.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les phases d'apprentissage
+    router.get("/", phaseapp.findAll);
+
+    // Récupérer une seule phase d'apprentissage avec id
+    router.get("/:id", phaseapp.findOne);
+
+    app.use("/api/phaseapp", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.phaseapp.routes")(app);
+...
+```

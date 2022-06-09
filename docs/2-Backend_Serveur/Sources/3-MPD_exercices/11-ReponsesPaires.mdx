@@ -1,0 +1,152 @@
+# Réponses paires
+
+## Service
+
+```js title="./src/services/alecol.reponse_paires.service.js"
+import http from "../http-common";
+
+class ReponsePairesDataService {
+    getAll() {
+        return http.get("/reponsesPaires");
+    }
+
+    get(id) {
+        return http.get(`/reponsesPaires/${id}`);
+    }
+
+    findByExoId(fk_exo_id) {
+        return http.get(`/reponsesPaires?fk_exo_id=${fk_exo_id}`);
+    }
+}
+
+export default new ReponsePairesDataService();
+```
+
+```js title="./src/services/index.js"
+const ReponsePairesService = require("./alecol.reponse_paires.service");
+...
+const Services = {};
+...
+Services.ReponsePairesService = ReponsePairesService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/reponse_paires.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Reponses_paires = sequelize.define("reponses_paires", {
+        FK_Exo_ID: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "exercices",
+                key: "pk_exo_id",
+            },
+        },
+        Type_Rep_1: {
+            type: Sequelize.STRING,
+        },
+        FK_Rep_ID_1: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        Type_Rep_2: {
+            type: Sequelize.STRING,
+        },
+        FK_Rep_ID_2: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+    });
+
+    return Reponses_paires;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.reponse_paires = require("./reponse_paires.model")(sequelize, Sequelize);
+...
+// reponses_paires => exercices
+db.exercices.hasMany(db.reponse_paires, { foreignKey: "FK_Exo_ID" });
+db.reponse_paires.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.reponse_paires.controllers.js"
+const db = require("../models");
+const Reponse = db.reponse_memory;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses memory de la base de données
+const db = require("../models");
+const Reponse = db.reponse_paires;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses paires de la base de données
+exports.findAll = (req, res) => {
+    const exoId = req.query.fk_exo_id;
+
+    var condition = exoId ? { FK_Exo_ID: { [Op.like]: `${exoId}` } } : null;
+
+    Reponse.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des réponses paires.",
+            });
+        });
+};
+
+// Trouver une seule réponse paires avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Reponse.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse paires avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.reponse_paires.routes.js"
+module.exports = (app) => {
+    const reponse_paires = require("../controllers/alecol.reponse_paires.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les réponses paires
+    router.get("/", reponse_paires.findAll);
+
+    // Récupérer une seule réponse paires avec id
+    router.get("/:id", reponse_paires.findOne);
+
+    app.use("/api/reponsesPaires", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.reponse_paires.routes")(app);
+...
+```

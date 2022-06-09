@@ -1,0 +1,68 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Contextes
+
+## ActiveRoute
+
+```js title="./src/contexts/ActiveRouteContext.js"
+import React, { useState, createContext } from "react";
+
+export const ActiveRouteContext = createContext();
+
+export const ActiveRouteProvider = (props) => {
+  const [ActiveRoute, setActiveRoute] = useState("/matieres");
+
+  return (
+    <ActiveRouteContext.Provider value={[ActiveRoute, setActiveRoute]}>
+      {props.children}
+    </ActiveRouteContext.Provider>
+  );
+};
+```
+
+-----
+
+## User
+
+```js title="./src/contexts/UserContext.js"
+import React, { useState, createContext } from "react";
+
+export const UserContext = createContext();
+
+export const UserProvider = (props) => {
+  const [User, setUser] = useState({
+    isLoggedIn: false,
+  });
+
+  return (
+    <UserContext.Provider value={[User, setUser]}>
+      {props.children}
+    </UserContext.Provider>
+  );
+};
+```
+
+-----
+
+## Exercice
+
+```js title="./src/contexts/ExerciceContext.js"
+import React, { createContext, useState } from "react";
+
+export const ExerciceContext = createContext();
+
+export const ExerciceProvider = (props) => {
+  const [Exercice, setExercice] = useState({});
+
+  return (
+    <ExerciceContext.Provider value={[Exercice, setExercice]}>
+      {props.children}
+    </ExerciceContext.Provider>
+  );
+};
+```

@@ -1,0 +1,38 @@
+# Classe => leçon
+
+## Modèle
+
+```js title="./src/models/classe_lesson.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Lesson = sequelize.define("classe_lesson", {
+        classe_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "classe",
+                key: "id",
+            },
+        },
+        lesson_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "lesson",
+                key: "id",
+            },
+        },
+    });
+
+    return Lesson;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.classe_lesson = require("./classe_lesson.model")(sequelize, Sequelize);
+...
+// classe <=> lesson
+db.classes.belongsToMany(db.lessons, {through: "classe_lesson", foreignKey: "classe_id",});
+db.lessons.belongsToMany(db.classes, {through: "classe_lesson", foreignKey: "lesson_id",});
+...
+```
+
+-----

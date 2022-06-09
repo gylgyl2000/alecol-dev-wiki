@@ -1,0 +1,131 @@
+# Professeur
+
+## Service
+
+```js title="./src/services/alecol.professeur.service.js"
+import http from "../http-common";
+
+class ProfesseurDataService {
+    getAll() {
+        return http.get("/professeurs");
+    }
+
+    get(id) {
+        return http.get(`/professeurs/${id}`);
+    }
+
+    findByNom(nom) {
+        return http.get(`/professeurs?nom=${nom}`);
+    }
+}
+
+export default new ProfesseurDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const ProfesseurService = require("./alecol.professeur.service");
+...
+const Services = {};
+...
+Services.ProfesseurService = ProfesseurService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/professeur.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Professeur = sequelize.define("professeur", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return Professeur;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.professeur = require("./professeur.model")(sequelize, Sequelize);
+...
+
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.professeur.controllers.js"
+const db = require("../models");
+const Professeur = db.professeurs;
+const Op = db.Sequelize.Op;
+
+// Récupérer tous les professeurs de la base de données
+exports.findAll = (req, res) => {
+  const nom = req.query.nom;
+
+  var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+
+  var condition = nameCondition;
+
+  Professeur.findAll({ where: condition })
+    .then((data) => {
+        res.send(data);
+    })
+    .catch((err) => {
+        res.status(500).send({
+            message:
+                err.message || "Une erreur s'est produite lors de la récupération des Professeurs.",
+        });
+    });
+};
+
+// Trouver un seul professeur avec un identifiant
+exports.findOne = (req, res) => {
+  const id = req.params.id;
+
+  Professeur.findByPk(id)
+    .then((data) => {
+        res.send(data);
+    })
+    .catch((err) => {
+        res.status(500).send({
+            message: "Erreur lors de la récupération du professeur avec l'id=" + id,
+        });
+    });
+};
+```
+-----
+
+## Route
+
+```js title="./src/routes/alecol.professeur.routes.js"
+module.exports = (app) => {
+    const professeurs = require("../controllers/alecol.professeur.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les professeurs
+    router.get("/", professeurs.findAll);
+
+    // Récupérer un seul professeur avec id
+    router.get("/:id", professeurs.findOne);
+
+    app.use("/api/professeurs", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.professeur.routes")(app);
+...
+```

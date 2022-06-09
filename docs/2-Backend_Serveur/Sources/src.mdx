@@ -1,0 +1,179 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# src
+
+## Services
+
+### index.js
+
+```js title="./src/services/index.js"
+const ActiviteService = require("./alecol.activite_clnt.service");
+const ClasseService = require("./alecol.classe.service");
+const ImageService = require("./alecol.images.service");
+const NatureActivService = require("./alecol.natureactiv.service");
+const PhaseAppService = require("./alecol.phaseapp.service");
+const ReponseExosService = require("./alecol.reponses_exos.service");
+const TypeExerciceService = require("./alecol.type_exercice.service");
+const LessonService = require("./alecol.lesson.service");
+const ExerciceService = require("./alecol.exercices.service");
+const EleveService = require("./alecol.eleve.service");
+const MatiereService = require("./alecol.matiere.service");
+const MetaCompService = require("./alecol.metacomp.service");
+const CatCompService = require("./alecol.catcomp.service");
+const ReponseMemoryService = require("./alecol.reponses_memory.service");
+const ReponsePairesService = require("./alecol.reponses_paires.service");
+const ReponsesImgService = require("./alecol.rep_img.service");
+const ReponsesTxtService = require("./alecol.rep_txt.service");
+
+const Services = {};
+
+Services.LessonService = LessonService.default;
+Services.ExerciceService = ExerciceService.default;
+Services.ActiviteService = ActiviteService.default;
+Services.ClasseService = ClasseService.default;
+Services.ImageService = ImageService.default;
+Services.NatureActivService = NatureActivService.default;
+Services.PhaseAppService = PhaseAppService.default;
+Services.ReponseExosService = ReponseExosService.default;
+Services.TypeExerciceService = TypeExerciceService.default;
+Services.EleveService = EleveService.default;
+Services.MatiereService = MatiereService.default;
+Services.MetaCompService = MetaCompService.default;
+Services.CatCompService = CatCompService.default;
+Services.ReponseMemoryService = ReponseMemoryService.default;
+Services.ReponsePairesService = ReponsePairesService.default;
+Services.RepImgService = ReponsesImgService.default;
+Services.RepTxtService = ReponsesTxtService.default;
+
+export default Services;
+```
+
+- `./src/services/alecol.activite_clnt.service.js`
+
+
+
+
+## Modèles
+
+### index.js
+
+```js title="./src/models/index.js"
+const dbConfig = require("../config/db.config.js");
+
+const Sequelize = require("sequelize");
+const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
+    host: dbConfig.HOST,
+    dialect: dbConfig.dialect,
+    operatorsAliases: false,
+    port: dbConfig.PORT,
+    pool: {
+        max: dbConfig.pool.max,
+        min: dbConfig.pool.min,
+        acquire: dbConfig.pool.acquire,
+        idle: dbConfig.pool.idle,
+    },
+    define: {
+        freezeTableName: true,
+        timestamps: false,
+    },
+});
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+console.log("Initialisation de la connexion");
+
+db.activite = require("./activite_clnt.model")(sequelize, Sequelize);
+db.activite_requiert_comspec = require("./activite_requiert_comspec.model")(sequelize, Sequelize);
+db.catcomp = require("./catcomp.model")(sequelize, Sequelize);
+db.classe_catcomp_has_compgen = require("./classe_catcomp_has_compgen.model")(sequelize, Sequelize);
+db.classe_lesson = require("./classe_lesson.model")(sequelize, Sequelize);
+db.classe_prof = require("./classe_prof.model")(sequelize, Sequelize);
+db.classe = require("./classe.model")(sequelize, Sequelize);
+db.compgen_has_compspec = require("./compgen_has_compspec.model")(sequelize, Sequelize);
+db.depend_compgen = require("./depend_compgen.model")(sequelize, Sequelize);
+db.eleve_has_matiere = require("./eleve_has_matiere.model")(sequelize, Sequelize);
+db.eleve = require("./eleve.model")(sequelize, Sequelize);
+db.exercices = require("./exercices.model")(sequelize, Sequelize);
+db.format_exercice = require("./format_exercice.model")(sequelize, Sequelize);
+db.images = require("./images.model")(sequelize, Sequelize);
+db.lesson = require("./lesson.model")(sequelize, Sequelize);
+db.matiere = require("./matiere.model")(sequelize, Sequelize);
+db.metacomp = require("./metacomp.model")(sequelize, Sequelize);
+db.natureactiv_phaseapp = require("./natureactiv_phaseapp.model")(sequelize, Sequelize);
+db.natureactiv = require("./natureactiv.model")(sequelize, Sequelize);
+db.param_rep_image = require("./param_rep_image.model")(sequelize, Sequelize);
+db.parent_has_enfant = require("./parent_has_enfant.model")(sequelize, Sequelize);
+db.parent = require("./parent.model")(sequelize, Sequelize);
+db.phaseapp = require("./phaseapp.model")(sequelize, Sequelize);
+db.professeur = require("./professeur.model")(sequelize, Sequelize);
+db.rep_img = require("./rep_img.model")(sequelize, Sequelize);
+db.rep_txt = require("./rep_txt.model")(sequelize, Sequelize);
+db.reponses_exos = require("./reponses_exos.model")(sequelize, Sequelize);
+db.reponses_memory = require("./reponses_memory.model")(sequelize, Sequelize);
+db.reponses_paires = require("./reponses_paires.model")(sequelize, Sequelize);
+db.reponses_trous = require("./reponses_trous.model")(sequelize, Sequelize);
+db.reponses = require("./reponses.model")(sequelize, Sequelize);
+db.score_eleves = require("./score_eleves.model")(sequelize, Sequelize);
+db.type_exercice = require("./type_exercice.model")(sequelize, Sequelize);
+
+/**
+ * create dependencies between models
+ */
+
+db.activite.belongsTo(db.lesson, { foreignKey: "FK_lesson_id" });
+db.lesson.hasMany(db.activite, { foreignKey: "FK_lesson_id" });
+
+// db.activite.belongsTo(db.classe, { foreignKey: "FK_classe_id" });
+// db.classe.hasMany(db.activite, { foreignKey: "FK_classe_id" });
+
+
+
+db.classe.belongsToMany(db.lesson, { through: "classe_lesson", foreignKey: "FK_classe_id",});
+db.lesson.belongsToMany(db.classe, { through: "classe_lesson", foreignKey: "FK_lesson_id",});
+
+db.matiere.hasMany(db.metacomp, { foreignKey: "FK_matiere_id" });
+db.metacomp.belongsTo(db.matiere, { foreignKey: "FK_matiere_id" });
+
+db.metacomp.hasMany(db.catcomp, { foreignKey: "FK_metacomp_id" });
+db.catcomp.belongsTo(db.metacomp, { foreignKey: "FK_metacomp_id" });
+
+db.catcomp.hasMany(db.lesson, { foreignKey: "FK_catcomp_id" });
+db.lesson.belongsTo(db.catcomp, { foreignKey: "FK_catcomp_id" });
+
+
+
+db.exercices.belongsTo(db.activite, { foreignKey: "FK_activite_clnt_id" });
+db.activite.hasMany(db.exercices, { foreignKey: "FK_activite_clnt_id" });
+
+
+db.exercices.belongsTo(db.activite, { foreignKey: "PK_exercices_id" });
+db.activite.hasMany(db.exercices, { foreignKey: "PK_exercices_id" });
+
+
+
+db.type_exercice.hasMany(db.activite, { foreignKey: "typrep" });
+db.activite.belongsTo(db.type_exercice, { foreignKey: "typrep" });
+
+db.type_exercice.hasMany(db.reponses_exos, { foreignKey: "FK_type_exercice_id" });
+db.reponses_exos.belongsTo(db.type_exercice, { foreignKey: "FK_type_exercice_id" });
+
+db.exercices.hasMany(db.reponses_exos, { foreignKey: "FK_exercices_id" });
+db.reponses_exos.belongsTo(db.exercices, { foreignKey: "FK_exercices_id" });
+
+module.exports = db;
+```
+
+## Contrôleurs
+
+- `./src/controllers/alecol.activite_clnt.controllers.js`
+
+## Routes
+
+- `./src/routes/alecol.activite_clnt.routes.js`

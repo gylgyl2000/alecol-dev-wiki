@@ -1,0 +1,158 @@
+# Images
+
+## Service
+
+```js title="./src/services/alecol.images.service.js"
+import http from "../http-common";
+
+class ImagesDataService {
+    getAll() {
+        return http.get("/images");
+    }
+
+    get(id) {
+        return http.get(`/images/${id}`);
+    }
+
+    findByNom(nom) {
+        return http.get(`/images?nom=${nom}`);
+    }
+}
+
+export default new ImagesDataService();
+```
+
+```js title="./src/services/index.js"
+const ImageService = require("./alecol.images.service");
+...
+const Services = {};
+...
+Services.ImageService = ImageService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/images.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Image = sequelize.define("images", {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+        categorie: {
+            type: Sequelize.STRING,
+        },
+        genre: {
+            type: Sequelize.STRING,
+        },
+        nombre: {
+            type: Sequelize.STRING,
+        },
+        premiere_lettre: {
+            type: Sequelize.STRING,
+        },
+        voyelle: {
+            type: Sequelize.BOOLEAN,
+        },
+        ensemble: {
+            type: Sequelize.STRING,
+        },
+        pluriel: {
+            type: Sequelize.STRING,
+        },
+        theme: {
+            type: Sequelize.STRING,
+        },
+        fichier: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return Image;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.images = require("./images.model")(sequelize, Sequelize);
+...
+
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.images.controllers.js"
+const db = require("../models");
+const Images = db.images;
+const Op = db.Sequelize.Op;
+
+// Récupérer tous les images de la base de données
+exports.findAll = (req, res) => {
+    const nom = req.query.nom;
+
+    var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+
+    var condition = nameCondition;
+
+    Images.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des images.",
+            });
+        });
+};
+
+// Trouver un seul image avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Images.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de l'image avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.images.routes.js"
+module.exports = (app) => {
+    const images = require("../controllers/alecol.images.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les images
+    router.get("/", images.findAll);
+
+    // Récupérer une seule image avec id
+    router.get("/:id", images.findOne);
+
+    app.use("/api/images", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.images.routes")(app);
+...
+```

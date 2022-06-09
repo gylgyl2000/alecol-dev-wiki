@@ -1,0 +1,134 @@
+---
+sidebar_position: 3
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# app.js
+
+```js title="./src/my-app/App.js"
+import React, { useContext, useEffect, useState } from "react";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Matieres from "../Components/organisms/matiere/Matieres";
+import Themes from "../Components/organisms/theme/Themes";
+import Competences from "../Components/organisms/competence/Competences";
+import Exercices from "../Components/organisms/exercice/Exercices";
+import Questions from "../Components/organisms/question/Questions";
+
+import Header from "../Components/molecules/header/Header";
+import NavBar from "../Components/molecules/navBar/NavBar";
+
+import "./App.css";
+import Register from "../Components/organisms/register/Register";
+import Signin from "../Components/organisms/signin/Signin";
+import PrivateRoute from "../Components/atoms/privateRoute/PrivateRoute";
+import PublicRoute from "../Components/atoms/publicRoute/PublicRoute";
+import CircularProgress from "@material-ui/core/CircularProgress";
+
+import { UserContext } from "../contexts/UserContext";
+import Services from "../services";
+import Home from "../Components/organisms/home/Home";
+import Exit from "../Components/atoms/exit/Exit";
+import Selection from "../Components/organisms/selection/Selection";
+
+const App = () => {
+  const [User, setUser] = useContext(UserContext);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const checkUserAuth = () => {
+    Services.EleveService.getUserFromToken({
+      token: localStorage.getItem("token"),
+    })
+      .then((res) => {
+        setUser({
+          id: res.data.id,
+          prenom: res.data.prenom,
+          isLoggedIn: true,
+        });
+
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    checkUserAuth();
+  }, []);
+
+  if (!isLoading) {
+    return (
+      <div className="App">
+        <Router>
+          <Switch>
+            <PublicRoute isLoggedIn={User.isLoggedIn} exact path="/">
+              <Header />
+              <NavBar />
+            </PublicRoute>
+
+            <PublicRoute isLoggedIn={User.isLoggedIn} path="/inscription">
+              <Register />
+            </PublicRoute>
+
+            <PublicRoute isLoggedIn={User.isLoggedIn} path="/connexion">
+              <Signin />
+            </PublicRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/home">
+              <Home />
+              <Exit />
+            </PrivateRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/selection">
+              <Selection />
+              <Exit />
+            </PrivateRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/matieres">
+              <Header />
+              <Matieres />
+              <NavBar />
+            </PrivateRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/themes">
+              <Header />
+              <Themes />
+              <NavBar />
+            </PrivateRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/competences">
+              <Header />
+              <Competences />
+              <NavBar />
+            </PrivateRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/exercices">
+              <Exercices />
+              <Exit />
+            </PrivateRoute>
+
+            <PrivateRoute isLoggedIn={User.isLoggedIn} path="/questions">
+              <Questions />
+              <Exit />
+            </PrivateRoute>
+          </Switch>
+        </Router>
+      </div>
+    );
+  } else {
+    return (
+      <div className="loading__container">
+        <CircularProgress className="loading__circularProgress" />
+      </div>
+    );
+  }
+};
+
+export default App;
+```

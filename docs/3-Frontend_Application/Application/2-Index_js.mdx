@@ -1,0 +1,61 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# index.js
+
+```js title="./src/index.js"
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./my-app/App";
+import { MatiereProvider } from "./contexts/MatiereContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { CompetenceProvider } from "./contexts/CompetenceContext";
+import { ActiveRouteProvider } from "./contexts/ActiveRouteContext";
+import { VisibleCardsProvider } from "./contexts/VisibleCardsContext";
+import { FirstChosenCardProvider } from "./contexts/FirstChosenCardContext";
+import { SecondChosenCardProvider } from "./contexts/SecondChosenCardContext";
+
+import "./index.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { ExerciceProvider } from "./contexts/ExerciceContext";
+import { UserProvider } from "./contexts/UserContext";
+import { ExercicesProvider } from "./contexts/ExercicesContext";
+import { CardResultsProvider } from "./contexts/CardResultsContext";
+import { PairAnswersProvider } from "./contexts/PairAnswersContext";
+
+ReactDOM.render(
+  <React.StrictMode>
+    <MatiereProvider>
+      <ThemeProvider>
+        <CompetenceProvider>
+          <ExerciceProvider>
+            <ActiveRouteProvider>
+              <VisibleCardsProvider>
+                <FirstChosenCardProvider>
+                  <SecondChosenCardProvider>
+                    <UserProvider>
+                      <ExercicesProvider>
+                        <CardResultsProvider>
+                          <PairAnswersProvider>
+                            <App />
+                          </PairAnswersProvider>
+                        </CardResultsProvider>
+                      </ExercicesProvider>
+                    </UserProvider>
+                  </SecondChosenCardProvider>
+                </FirstChosenCardProvider>
+              </VisibleCardsProvider>
+            </ActiveRouteProvider>
+          </ExerciceProvider>
+        </CompetenceProvider>
+      </ThemeProvider>
+    </MatiereProvider>
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+
+```

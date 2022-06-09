@@ -1,0 +1,217 @@
+# Élève
+
+## Service
+
+```js title="./src/services/alecol.eleve.service.js"
+import http from "../http-common";
+
+class EleveDataService {
+    getAll() {
+        return http.get("/eleve");
+    }
+
+    get(id) {
+        return http.get(`/eleve/${id}`);
+    }
+
+    post(data) {
+        return http.post("/eleve", data);
+    }
+
+    findByNom(nom) {
+        return http.get(`/eleve?nom=${nom}`);
+    }
+
+    findByEmail(email) {
+        return http.get(`/eleve?email=${email}`);
+    }
+
+    login(data) {
+        return http.post("/eleve/login", data);
+    }
+
+    getUserFromToken(token) {
+        return http.post("/eleve/getUser", token);
+    }
+}
+
+export default new EleveDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const EleveService = require("./alecol.eleve.service");
+...
+const Services = {};
+...
+Services.EleveService = EleveService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/eleve.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Eleve = sequelize.define("eleve", {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+
+        email: {
+            type: Sequelize.STRING,
+        },
+        password: {
+            type: Sequelize.STRING,
+        },
+        createTime: {
+            type: Sequelize.DATE,
+        },
+        dateNaissance: {
+            type: Sequelize.DATE,
+        },
+        dateDebut: {
+            type: Sequelize.DATE,
+        },
+        classe_id: {
+            type: Sequelize.STRING,
+            references: {
+                model: "classe",
+                key: "id",
+            },
+        },
+    });
+
+    return Eleve;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.eleves = require("./eleve.model")(sequelize, Sequelize);
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.eleve.controllers.js"
+const bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+
+const db = require("../models");
+const Eleve = db.eleves;
+const Op = db.Sequelize.Op;
+
+// Retrieve all competences from the database.
+exports.findAll = (req, res) => {
+    const email = req.query.email;
+
+    var condition = email ? { email: { [Op.like]: `${email}` } } : null;
+
+    Eleve.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Some error occurred while retrieving Competences.",
+            });
+        });
+};
+
+// Find a single competence with an id
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Eleve.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Error retrieving Competence with id=" + id,
+            });
+        });
+};
+
+exports.postOne = (req, res) => {
+    let data = req.body;
+
+    data = { ...data, classe_id: "CP" };
+
+    Eleve.create(data)
+        .then(() => {
+            res.send("inscription réussi");
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Register Error",
+            });
+        });
+};
+
+exports.loginEleve = (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    var condition = email ? { email: { [Op.like]: `${email}` } } : null;
+
+    Eleve.findAll({ where: condition }).then((data) => {
+        if (
+            data[0].email === email &&
+            bcrypt.compareSync(password, data[0].password)
+        ) {
+            const token = jwt.sign({ id: data[0].id, nom: data[0].nom }, "MA_CLE", {
+                expiresIn: "1h",
+            });
+
+            res.status(200).send({ token: token });
+        }
+    });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.eleve.routes.js"
+const checkAuth = require("../middleware/auth_middleware");
+
+module.exports = (app) => {
+    const eleves = require("../controllers/alecol.eleve.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer tous les élèves
+    router.get("/", eleves.findAll);
+
+    // Poster un élève
+    router.post("/", eleves.postOne);
+
+    // Récupérer un seul élève avec id
+    router.get("/:id", eleves.findOne);
+
+    router.post("/login", eleves.loginEleve);
+
+    router.post("/getUser", checkAuth);
+
+    app.use("/api/eleve", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.eleve.routes")(app);
+...
+```

@@ -1,0 +1,142 @@
+# Réponse image
+
+## Service
+
+```js title="./src/services/alecol.Rep_Img.service.js"
+import http from "../http-common";
+
+class ReponsesImgDataService {
+    getAll() {
+        return http.get("/reponsesImg");
+    }
+
+    get(id) {
+        return http.get(`/reponsesImg/${id}`);
+    }
+
+    findByImage(fk_Img_id) {
+        return http.get(`/reponsesImg?fk_Img_id=${fk_Img_id}`);
+    }
+}
+
+export default new ReponsesImgDataService();
+```
+
+```js title="./src/services/index.js"
+const ReponsesImgService = require("./alecol.Rep_Img.service");
+...
+const Services = {};
+...
+Services.RepImgService = ReponsesImgService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/Rep_Img.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Rep_Img = sequelize.define("rep_img", {
+        ID: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        FK_Img_id: {
+            type: Sequelize.INTEGER,
+            references: {
+                model: "images",
+                key: "id",
+            },
+        },
+        Nom: {
+            type: Sequelize.STRING,
+        },
+        Nombre: {
+            type: Sequelize.INTEGER,
+        },
+    });
+
+    return Rep_Img;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.Rep_Img = require("./Rep_Img.model")(sequelize, Sequelize);
+...
+// Rep_Img => images
+db.images.hasMany(db.Rep_Img, { foreignKey: "FK_Img_id" });
+db.Rep_Img.belongsTo(db.images, { foreignKey: "FK_Img_id" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.Rep_Img.controllers.js"
+const db = require("../models");
+const Reponse = db.Rep_Img;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses image de la base de données
+exports.findAll = (req, res) => {
+    const imgId = req.query.fk_Img_id;
+
+    var condition = imgId ? { FK_Img_id: { [Op.like]: `${imgId}` } } : null;
+
+    Reponse.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des réponses image.",
+            });
+        });
+};
+
+// Trouver une seule réponse image avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Reponse.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse image avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.Rep_Img.routes.js"
+module.exports = (app) => {
+    const Rep_Img = require("../controllers/alecol.Rep_Img.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les réponses image
+    router.get("/", Rep_Img.findAll);
+
+    // Récupérer une seule réponse image avec id
+    router.get("/:id", Rep_Img.findOne);
+
+    app.use("/api/reponsesImg", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.Rep_Img.routes")(app);
+...
+```

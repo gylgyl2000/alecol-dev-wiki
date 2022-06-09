@@ -1,0 +1,131 @@
+# Matiere
+
+## Service
+
+```js title="./src/services/alecol.matiere.service.js"
+import http from "../http-common";
+
+class MatiereDataService {
+    getAll() {
+        return http.get("/matieres");
+    }
+
+    get(id) {
+        return http.get(`/matieres/${id}`);
+    }
+
+    findByNom(nom) {
+        return http.get(`/matieres?nom=${nom}`);
+    }
+}
+
+export default new MatiereDataService();
+```
+
+```js title="./src/services/index.js"
+...
+const MatiereService = require("./alecol.matiere.service");
+...
+const Services = {};
+...
+Services.MatiereService = MatiereService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/matiere.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Matiere = sequelize.define("matiere", {
+        id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+        },
+        nom: {
+            type: Sequelize.STRING,
+        },
+    });
+
+    return Matiere;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.matieres = require("./matiere.model")(sequelize, Sequelize);
+...
+
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.matiere.controllers.js"
+const db = require("../models");
+const Matiere = db.matieres;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les matières de la base de données
+exports.findAll = (req, res) => {
+    const nom = req.query.nom;
+
+    var nameCondition = nom ? { nom: { [Op.like]: `${nom}` } } : null;
+
+    var condition = nameCondition;
+
+    Matiere.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err.message || "Une erreur s'est produite lors de la récupération des Matières.",
+            });
+        });
+};
+
+// Trouver une seule matière avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Matiere.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la matière avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.matiere.routes.js"
+module.exports = (app) => {
+    const matieres = require("../controllers/alecol.matiere.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les matières
+    router.get("/", matieres.findAll);
+
+    // Récupérer une seule matière avec id
+    router.get("/:id", matieres.findOne);
+
+    app.use("/api/matieres", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.matiere.routes")(app);
+...
+```

@@ -1,0 +1,164 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# API
+
+export const Highlight = ({children, color}) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: '5px',
+      color: '#fff',
+      padding: '0.3rem 1rem',
+      fontWeight: 'bold',
+    }}>
+    {children}
+  </span>
+);
+
+## Route de test
+
+- `GET` http://localhost:8082/ - **_server.js_**
+
+What about **_alecol\_nodeserver.js_** ?
+
+Appelle les routes : _./src/routes/..._
+
+-----
+
+## Cheminement
+
+- `./src/config/db.config.js`
+- `./src/models/index.js`
+- `./src/models/[...].model.js`
+- `./src/controllers/alecol.controllers.js`
+- `./src/controllers/alecol.[...].controllers.js`
+- `./src/routes/alecol.[...].routes.js`
+
+-----
+
+## HTTP
+
+```shell title="http-common.js"
+import axios from "axios";
+
+export default axios.create({
+  baseURL: "http://localhost:8082/api",
+  headers: {
+    "Content-type": "application/json",
+  },
+});
+```
+
+
+
+
+#### /api/catcomp
+
+- `GET` /api/catcomp/ - catcomp.findAll - Affiche toutes les catégories de compétences
+- `GET` /api/catcomp/:id - catcomp.findOne - Affiche une catégorie de compétences par son ID
+
+#### /api/classes
+
+- `GET` /api/classes/ - classes.findAll - Affiche toutes les classes
+- `GET` /api/classes/:id - classes.findOne - Affiche une classe
+
+#### /api/elements
+
+- `GET` /api/elements/ - elements.findAll - Affiche tous les éléments
+- `GET` /api/elements/:id - elements.findOne - Affiche un élément
+
+#### /api/eleves
+
+- `GET` /api/eleves/ - eleves.findAll - Affiche tous les élèves
+- `POST` /api/eleves/ - eleves.postOne - Ajoute un élève
+- `GET` /api/eleves/:id - eleves.findOne - Affiche un élève
+- `POST` /api/eleves/login - eleves.loginEleve - Connecte un élève
+- `POST` /api/eleves/getUser - checkAuth - Vérifie l'autorisation d'un élève
+
+#### /api/exercices
+
+- `GET` /api/exercices/ - exercices.findAll - Affiche tous les exercices
+- `GET` /api/exercices/:id - exercices.findOne - Affiche un exercice
+
+#### /api/lessons
+
+- `GET` /api/lessons/ - lessons.findAll - Affiche toutes les leçons
+- `GET` /api/lessons/:id - lessons.findOne - Affiche une leçon
+
+#### /api/matieres
+
+- `GET` /api/matieres/ - matieres.findAll - Affiche toutes les matières
+- `GET` /api/matieres/:id - matieres.findOne - Affiche une matière
+
+
+<details>
+  <summary>&#91;</summary>
+  <details>
+    <summary>&#123;</summary>
+        "id": "E",<br />
+        "nom": "Ecriture"<br />
+    &#125;,
+  </details>
+  <details>
+    <summary>&#123;</summary>
+        "id": "L",<br />
+        "nom": "Lecture"<br />
+    &#125;,
+  </details>
+  <details>
+    <summary>&#123;</summary>
+        "id": "M",<br />
+        "nom": "Maths"<br />
+    &#125;
+  </details>
+  &#93;
+</details>
+
+#### /api/metacomp
+
+- `GET` /api/metacomp/ - metacomp.findAll - Affiche toutes les méta compétences
+- `GET` /api/metacomp/:id - metacomp.findOne - Affiche une méta compétence
+
+#### /api/natureactiv
+
+- `GET` /api/natureactiv/ - natureactiv.findAll - Affiche toutes les natures d'activité
+- `GET` /api/natureactiv/:id - natureactiv.findOne - Affiche une nature d'activité
+
+#### /api/phaseapp
+
+- `GET` /api/phaseapp/ - phaseapp.findAll - Affiche toutes les phases d'apprentissage
+- `GET` /api/phaseapp/:id - phaseapp.findOne - Affiche une phase d'apprentissage
+
+#### /api/reponsesImg
+
+- `GET` /api/reponsesImg/ - Rep_Img.findAll - Affiche toutes les réponses sous forme d'image
+- `GET` /api/reponsesImg/:id - Rep_Img.findOne - Affiche une réponse sous forme d'image
+
+#### /api/reponsesTxt
+
+- `GET` /api/reponsesTxt/ - reponsesTxt.findAll - Affiche toutes les réponses sous forme de texte
+- `GET` /api/reponsesTxt/:id - reponsesTxt.findOne - Affiche une réponse sous forme de texte
+
+#### /api/reponsesExos
+
+- `GET` /api/reponsesExos/ - reponse_exos.findAll - Affiche toutes les réponses de l'exercice
+- `GET` /api/reponsesExos/:id - reponse_exos.findOne - Affiche une réponse de l'exercice
+- `GET` /api/reponsesExos/:exoid - reponse_exos.findCountOfCorrectReponses - Affiche le nombre de bonnes réponses de l'exercice
+
+#### /api/reponsesMemory
+
+- `GET` /api/reponsesMemory/ - reponse_memory.findAll - Affiche toutes les réponses de l'exercice de mémoire
+- `GET` /api/reponsesMemory/:id - reponse_memory.findOne - Affiche une réponse de l'exercice de mémoire
+
+#### /api/reponsesPaires
+
+- `GET` /api/reponsesPaires/ - reponse_paires.findAll - Affiche toutes les réponses de l'exercice de paires
+- `GET` /api/reponsesPaires/:id - reponse_paires.findOne - Affiche une réponse de l'exercice de paires
+
+#### /api/typeReponse
+
+- `GET` /api/typeReponse/ - typeReponse.findAll - Affiche tous les types de réponses
+- `GET` /api/typeReponse/:id - typeReponse.findOne - Affiche un type de réponses
+
+-----
