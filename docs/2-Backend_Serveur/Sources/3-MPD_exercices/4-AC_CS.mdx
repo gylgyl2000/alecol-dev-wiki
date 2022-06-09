@@ -1,0 +1,40 @@
+# Compétence spécifique par activité
+
+## Modèle
+
+```js title="./src/models/ac_cs.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const ActiviteRequiert_CompSpec = sequelize.define("ac_cs", {
+        ac_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "ac_clnt",
+                key: "pk_ac_id",
+            },
+        },
+        cs_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "cg_cs",
+                key: "id",
+            },
+        },
+    });
+
+    return ActiviteRequiert_CompSpec;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.activiteRequiert_CompSpec = require("./ac_cs.model")(sequelize, Sequelize);
+...
+// activite <=> compspec
+db.compspec.belongsToMany(db.activite, {through: "ac_cs", foreignKey: "cg_cs_id",});
+db.activite.belongsToMany(db.compspec, {through: "ac_cs", foreignKey: "ac_clnt_pk_ac_id",});
+...
+```
+
+-----

@@ -2,14 +2,14 @@
 
 ## Modèle
 
-```js title="./src/models/depend_compgen.model.js"
+```js title="./src/models/dep_cg.model.js"
 module.exports = (sequelize, Sequelize) => {
-    const DependCompGen = sequelize.define("depend_compgen", {
+    const DependCompGen = sequelize.define("dep_cg", {
         fk_compgens_id: {
             type: Sequelize.STRING,
             primaryKey: true,
             references: {
-                model: "classe_catcomp_has_compgen",
+                model: "c_cc_cg",
                 key: "id",
             },
         },
@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             primaryKey: true,
             references: {
-                model: "classe_catcomp_has_compgen",
+                model: "c_cc_cg",
                 key: "id",
             },
         },
@@ -37,7 +37,7 @@ module.exports = (sequelize, Sequelize) => {
 
 ```js title="./src/models/index.js"
 ...
-db.dependCompgen = require("./depend_compgen.model")(sequelize, Sequelize);
+db.dependCompgen = require("./dep_cg.model")(sequelize, Sequelize);
 ...
 // depend_compgen => classe_catcomp_has_compgen S
 db.compgen.hasMany(db.dependCompgen, { foreignKey: "fk_compgens_id" });

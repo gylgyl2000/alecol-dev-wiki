@@ -2,32 +2,32 @@
 
 ## Service
 
-```js title="./src/services/alecol.natureactiv.service.js"
+```js title="./src/services/alecol.nac.service.js"
 import http from "../http-common";
 
-class NatureActivDataService {
+class NAcDataService {
     getAll() {
-        return http.get("/natureactiv");
+        return http.get("/nac");
     }
 
     get(id) {
-        return http.get(`/natureactiv/${id}`);
+        return http.get(`/nac/${id}`);
     }
 
     findByNom(nom) {
-        return http.get(`/natureactiv?nom=${nom}`);
+        return http.get(`/nac?nom=${nom}`);
     }
 }
 
-export default new NatureActivDataService();
+export default new NAcDataService();
 ```
 
 ```js title="./src/services/index.js"
-const NatureActivService = require("./alecol.natureactiv.service");
+const NAcDataService = require("./alecol.nac.service");
 ...
 const Services = {};
 ...
-Services.NatureActivService = NatureActivService.default;
+Services.NAcDataService = NAcDataService.default;
 ...
 export default Services;
 ```
@@ -36,9 +36,9 @@ export default Services;
 
 ## Modèle
 
-```js title="./src/models/natureactiv.model.js"
+```js title="./src/models/nac.model.js"
 module.exports = (sequelize, Sequelize) => {
-    const NatureActiv = sequelize.define("natureactiv", {
+    const NAc = sequelize.define("nac", {
         id: {
             type: Sequelize.STRING,
             primaryKey: true,
@@ -51,13 +51,13 @@ module.exports = (sequelize, Sequelize) => {
         },
     });
 
-    return NatureActiv;
+    return NAc;
 };
 ```
 
 ```js title="./src/models/index.js"
 ...
-db.natureActiv = require("./natureactiv.model")(sequelize, Sequelize);
+db.nAc = require("./nac.model")(sequelize, Sequelize);
 ...
 
 ```
@@ -66,9 +66,9 @@ db.natureActiv = require("./natureactiv.model")(sequelize, Sequelize);
 
 ## Contrôleur
 
-```js title="./src/controllers/alecol.natureactiv.controllers.js"
+```js title="./src/controllers/alecol.nac.controllers.js"
 const db = require("../models");
-const NatureActiv = db.natureActiv;
+const NAc = db.nAc;
 const Op = db.Sequelize.Op;
 
 // Récupérer toutes les natures d'activité de la base de données
@@ -79,7 +79,7 @@ exports.findAll = (req, res) => {
 
     var condition = nameCondition;
 
-    NatureActiv.findAll({ where: condition })
+    NAc.findAll({ where: condition })
         .then((data) => {
             res.send(data);
         })
@@ -94,7 +94,7 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
     const id = req.params.id;
 
-    NatureActiv.findByPk(id)
+    NAc.findByPk(id)
         .then((data) => {
             res.send(data);
         })
@@ -110,24 +110,24 @@ exports.findOne = (req, res) => {
 
 ## Route
 
-```js title="./src/routes/alecol.natureactiv.routes.js"
+```js title="./src/routes/alecol.nac.routes.js"
 module.exports = (app) => {
-    const natureactiv = require("../controllers/alecol.natureactiv.controllers");
+    const nac = require("../controllers/alecol.nac.controllers");
 
     var router = require("express").Router();
 
     // Récupérer toutes les natures d'activité
-    router.get("/", natureactiv.findAll);
+    router.get("/", nac.findAll);
 
     // Récupérer une seule nature d'activité avec id
-    router.get("/:id", natureactiv.findOne);
+    router.get("/:id", nac.findOne);
 
-    app.use("/api/natureactiv", router);
+    app.use("/api/nac", router);
 };
 ```
 
 ```js title="server.js"
 ...
-require("./src/routes/alecol.natureactiv.routes")(app);
+require("./src/routes/alecol.nac.routes")(app);
 ...
 ```

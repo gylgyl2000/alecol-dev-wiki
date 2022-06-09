@@ -2,7 +2,7 @@
 
 ## Service
 
-```js title="./src/services/alecol.compspec.service.js"
+```js title="./src/services/alecol.cg_cs.service.js"
 import http from "../http-common";
 
 class CompSpecDataService {
@@ -24,7 +24,7 @@ export default new CompSpecDataService();
 
 ```js title="./src/services/index.js"
 ...
-const CompSpecService = require("./alecol.compspec.service");
+const CompSpecService = require("./alecol.cg_cs.service");
 ...
 const Services = {};
 ...
@@ -37,13 +37,13 @@ export default Services;
 
 ## Modèle
 
-```js title="./src/models/compspec.model.js"
+```js title="./src/models/cg_cs.model.js"
 module.exports = (sequelize, Sequelize) => {
-    const CompSpec = sequelize.define("compgen_has_compspec", {
+    const CompSpec = sequelize.define("cg_cs", {
         fk_compgen_id: {
             type: Sequelize.STRING,
             references: {
-                model: "classe_catcomp_has_compgen",
+                model: "c_cc_cg",
                 key: "id",
             },
         },
@@ -65,7 +65,7 @@ module.exports = (sequelize, Sequelize) => {
 
 ```js title="./src/models/index.js"
 ...
-db.compspec = require("./compspec.model")(sequelize, Sequelize);
+db.compspec = require("./cg_cs.model")(sequelize, Sequelize);
 ...
 // compgen_has_compspec => classe_catcomp_has_compgen
 db.compgen.hasMany(db.compspec, { foreignKey: "fk_compgen_id" });
@@ -77,7 +77,7 @@ db.compspec.belongsTo(db.compgen, { foreignKey: "fk_compgen_id" });
 
 ## Contrôleur
 
-```js title="./src/controllers/alecol.compspe.controllers.js"
+```js title="./src/controllers/alecol.cg_cs.controllers.js"
 const db = require("../models");
 const CompSpec = db.compspec;
 const Op = db.Sequelize.Op;
@@ -121,9 +121,9 @@ exports.findOne = (req, res) => {
 
 ## Route
 
-```js title="./src/routes/alecol.compgen.routes.js"
+```js title="./src/routes/alecol.cg_cs.routes.js"
 module.exports = (app) => {
-    const compspec = require("../controllers/alecol.compspec.controllers");
+    const compspec = require("../controllers/alecol.cg_cs.controllers");
 
     var router = require("express").Router();
 
@@ -139,6 +139,6 @@ module.exports = (app) => {
 
 ```js title="server.js"
 ...
-require("./src/routes/alecol.compspec.routes")(app);
+require("./src/routes/alecol.cg_cs.routes")(app);
 ...
 ```

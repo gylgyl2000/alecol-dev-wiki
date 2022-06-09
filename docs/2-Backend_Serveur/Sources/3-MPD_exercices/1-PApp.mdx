@@ -2,32 +2,32 @@
 
 ## Service
 
-```js title="./src/services/alecol.phaseapp.service.js"
+```js title="./src/services/alecol.papp.service.js"
 import http from "../http-common";
 
-class PhaseAppDataService {
+class PAppDataService {
     getAll() {
-        return http.get("/phaseapp");
+        return http.get("/papp");
     }
 
     get(id) {
-        return http.get(`/phaseapp/${id}`);
+        return http.get(`/papp/${id}`);
     }
 
     findByNom(nom) {
-        return http.get(`/phaseapp?nom=${nom}`);
+        return http.get(`/papp?nom=${nom}`);
     }
 }
 
-export default new PhaseAppDataService();
+export default new PAppDataService();
 ```
 
 ```js title="./src/services/index.js"
-const PhaseAppService = require("./alecol.phaseapp.service");
+const PAppDataService = require("./alecol.papp.service");
 ...
 const Services = {};
 ...
-Services.PhaseAppService = PhaseAppService.default;
+Services.PAppDataService = PAppDataService.default;
 ...
 export default Services;
 ```
@@ -36,9 +36,9 @@ export default Services;
 
 ## Modèle
 
-```js title="./src/models/phaseapp.model.js"
+```js title="./src/models/papp.model.js"
 module.exports = (sequelize, Sequelize) => {
-    const PhaseApp = sequelize.define("phaseapp", {
+    const PApp = sequelize.define("papp", {
         id: {
             type: Sequelize.STRING,
             primaryKey: true,
@@ -51,13 +51,13 @@ module.exports = (sequelize, Sequelize) => {
         },
     });
 
-    return PhaseApp;
+    return PApp;
 };
 ```
 
 ```js title="./src/models/index.js"
 ...
-db.phaseApp = require("./phaseapp.model")(sequelize, Sequelize);
+db.pApp = require("./papp.model")(sequelize, Sequelize);
 ...
 
 ```
@@ -66,9 +66,9 @@ db.phaseApp = require("./phaseapp.model")(sequelize, Sequelize);
 
 ## Contrôleur
 
-```js title="./src/controllers/alecol.phaseapp.controllers.js"
+```js title="./src/controllers/alecol.papp.controllers.js"
 const db = require("../models");
-const PhaseApp = db.phaseApp;
+const PApp = db.pApp;
 const Op = db.Sequelize.Op;
 
 // Récupérer toutes les phases d'apprentissage de la base de données
@@ -79,7 +79,7 @@ exports.findAll = (req, res) => {
 
     var condition = nameCondition;
 
-    PhaseApp.findAll({ where: condition })
+    PApp.findAll({ where: condition })
         .then((data) => {
             res.send(data);
         })
@@ -94,7 +94,7 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
     const id = req.params.id;
 
-    PhaseApp.findByPk(id)
+    PApp.findByPk(id)
         .then((data) => {
             res.send(data);
         })
@@ -110,24 +110,24 @@ exports.findOne = (req, res) => {
 
 ## Route
 
-```js title="./src/routes/alecol.phaseapp.routes.js"
+```js title="./src/routes/alecol.papp.routes.js"
 module.exports = (app) => {
-    const phaseapp = require("../controllers/alecol.phaseapp.controllers");
+    const papp = require("../controllers/alecol.papp.controllers");
 
     var router = require("express").Router();
 
     // Récupérer toutes les phases d'apprentissage
-    router.get("/", phaseapp.findAll);
+    router.get("/", papp.findAll);
 
     // Récupérer une seule phase d'apprentissage avec id
-    router.get("/:id", phaseapp.findOne);
+    router.get("/:id", papp.findOne);
 
-    app.use("/api/phaseapp", router);
+    app.use("/api/papp", router);
 };
 ```
 
 ```js title="server.js"
 ...
-require("./src/routes/alecol.phaseapp.routes")(app);
+require("./src/routes/alecol.papp.routes")(app);
 ...
 ```

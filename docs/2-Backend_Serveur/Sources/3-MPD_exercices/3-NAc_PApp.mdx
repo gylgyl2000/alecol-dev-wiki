@@ -1,0 +1,40 @@
+# Nature d'activité par phase d'apprentissage
+
+## Modèle
+
+```js title="./src/models/nac_papp.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const NAc_PApp = sequelize.define("nac_papp", {
+        papp_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "papp",
+                key: "id",
+            },
+        },
+        nac_id: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "nac",
+                key: "id",
+            },
+        },
+    });
+
+    return NAc_PApp;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.nAc_pApp = require("./nac_papp.model")(sequelize, Sequelize);
+...
+// natureactiv <=> phaseapp
+db.pApp.belongsToMany(db.nAc, {through: "nac_papp", foreignKey: "papp_id",});
+db.nAc.belongsToMany(db.pApp, {through: "nac_papp", foreignKey: "nac_id",});
+...
+```
+
+-----
