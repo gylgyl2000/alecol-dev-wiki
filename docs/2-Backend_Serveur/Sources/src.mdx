@@ -12,51 +12,103 @@ import TabItem from '@theme/TabItem';
 ### index.js
 
 ```js title="./src/services/index.js"
-const ActiviteService = require("./alecol.activite_clnt.service");
-const ClasseService = require("./alecol.classe.service");
-const ImageService = require("./alecol.images.service");
-const NatureActivService = require("./alecol.natureactiv.service");
-const PhaseAppService = require("./alecol.phaseapp.service");
-const ReponseExosService = require("./alecol.reponses_exos.service");
-const TypeExerciceService = require("./alecol.type_exercice.service");
-const LessonService = require("./alecol.lesson.service");
-const ExerciceService = require("./alecol.exercices.service");
+// MPD Élève
+const ParentService = require("./alecol.parent.service");
 const EleveService = require("./alecol.eleve.service");
+const ClasseService = require("./alecol.classe.service");
+const ProfesseurService = require("./alecol.professeur.service");
 const MatiereService = require("./alecol.matiere.service");
+
+// MPD Compétences
 const MetaCompService = require("./alecol.metacomp.service");
 const CatCompService = require("./alecol.catcomp.service");
-const ReponseMemoryService = require("./alecol.reponses_memory.service");
-const ReponsePairesService = require("./alecol.reponses_paires.service");
-const ReponsesImgService = require("./alecol.rep_img.service");
-const ReponsesTxtService = require("./alecol.rep_txt.service");
+const CompGenService = require("./alecol.c_cc_cg.service");
+const CompSpecService = require("./alecol.cg_cs.service");
+
+// MPD Exercices
+const PAppDataService = require("./alecol.papp.service");
+const NAcDataService = require("./alecol.nac.service");
+const ActiviteService = require("./alecol.ac_clnt.service");
+const ExerciceService = require("./alecol.exercices.service");
+const ReponsesTxtService = require("./alecol.Rep_txt.service");
+const ReponsesImgService = require("./alecol.Rep_Img.service");
+const ReponseExosService = require("./alecol.reponse_exos.service");
+const ReponseMemoryService = require("./alecol.reponse_memory.service");
+const ReponsePairesService = require("./alecol.reponse_paires.service");
+const ReponseTrousService = require("./alecol.reponse_trous.service");
+const ReponseDessinPointsService = require("./alecol.reponse_dessin_points.service");
+const ScoreElevesService = require("./alecol.score_eleves.service");
+const TypeExoService = require("./alecol.type_exo.service");
+const ParamRepImageService = require("./alecol.param_rep_image.service");
+const LessonService = require("./alecol.lesson.service");
+const ImageService = require("./alecol.images.service");
 
 const Services = {};
 
-Services.LessonService = LessonService.default;
-Services.ExerciceService = ExerciceService.default;
-Services.ActiviteService = ActiviteService.default;
-Services.ClasseService = ClasseService.default;
-Services.ImageService = ImageService.default;
-Services.NatureActivService = NatureActivService.default;
-Services.PhaseAppService = PhaseAppService.default;
-Services.ReponseExosService = ReponseExosService.default;
-Services.TypeExerciceService = TypeExerciceService.default;
+// MPD Élève
+Services.ParentService = ParentService.default;
 Services.EleveService = EleveService.default;
+Services.ClasseService = ClasseService.default;
+Services.ProfesseurService = ProfesseurService.default;
 Services.MatiereService = MatiereService.default;
+
+// MPD Compétences
 Services.MetaCompService = MetaCompService.default;
 Services.CatCompService = CatCompService.default;
+Services.CompGenService = CompGenService.default;
+Services.CompSpecService = CompSpecService.default;
+
+// MPD Exercices
+Services.PAppDataService = PAppDataService.default;
+Services.NAcDataService = NAcDataService.default;
+Services.ActiviteService = ActiviteService.default;
+Services.ExerciceService = ExerciceService.default;
+Services.RepTxtService = ReponsesTxtService.default;
+Services.RepImgService = ReponsesImgService.default;
+Services.ReponseExosService = ReponseExosService.default;
 Services.ReponseMemoryService = ReponseMemoryService.default;
 Services.ReponsePairesService = ReponsePairesService.default;
-Services.RepImgService = ReponsesImgService.default;
-Services.RepTxtService = ReponsesTxtService.default;
+Services.ReponseTrousService = ReponseTrousService.default;
+Services.ReponseDessinPointsService = ReponseDessinPointsService.default;
+Services.ScoreElevesService = ScoreElevesService.default;
+Services.TypeExoService = TypeExoService.default;
+Services.ParamRepImageService = ParamRepImageService.default;
+Services.LessonService = LessonService.default;
+Services.ImageService = ImageService.default;
 
 export default Services;
 ```
 
-- `./src/services/alecol.activite_clnt.service.js`
+**MPD Élève**
+- `./alecol.parent.service`
+- `./alecol.eleve.service`
+- `./alecol.classe.service`
+- `./alecol.professeur.service`
+- `./alecol.matiere.service`
 
+**MPD Compétences**
+- `./alecol.metacomp.service`
+- `./alecol.catcomp.service`
+- `./alecol.c_cc_cg.service`
+- `./alecol.cg_cs.service`
 
-
+**MPD Exercices**
+- `./alecol.papp.service`
+- `./alecol.nac.service`
+- `./alecol.ac_clnt.service`
+- `./alecol.exercices.service`
+- `./alecol.Rep_txt.service`
+- `./alecol.Rep_Img.service`
+- `./alecol.reponse_dessin_points.service`
+- `./alecol.reponse_exos.service`
+- `./alecol.reponse_memory.service`
+- `./alecol.reponse_paires.service`
+- `./alecol.reponse_trous.service`
+- `./alecol.score_eleves.service`
+- `./alecol.type_exo.service`
+- `./alecol.param_rep_image.service`
+- `./alecol.lesson.service`
+- `./alecol.images.service`
 
 ## Modèles
 
@@ -89,91 +141,188 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 console.log("Initialisation de la connexion");
 
-db.activite = require("./activite_clnt.model")(sequelize, Sequelize);
-db.activite_requiert_comspec = require("./activite_requiert_comspec.model")(sequelize, Sequelize);
-db.catcomp = require("./catcomp.model")(sequelize, Sequelize);
-db.classe_catcomp_has_compgen = require("./classe_catcomp_has_compgen.model")(sequelize, Sequelize);
-db.classe_lesson = require("./classe_lesson.model")(sequelize, Sequelize);
+// MPD Élève
+db.parents = require("./parent.model")(sequelize, Sequelize);
+db.parentHasEnfant = require("./parent_has_enfant.model")(sequelize, Sequelize);
+db.eleves = require("./eleve.model")(sequelize, Sequelize);
+db.classes = require("./classe.model")(sequelize, Sequelize);
+db.professeurs = require("./professeur.model")(sequelize, Sequelize);
 db.classe_prof = require("./classe_prof.model")(sequelize, Sequelize);
-db.classe = require("./classe.model")(sequelize, Sequelize);
-db.compgen_has_compspec = require("./compgen_has_compspec.model")(sequelize, Sequelize);
-db.depend_compgen = require("./depend_compgen.model")(sequelize, Sequelize);
-db.eleve_has_matiere = require("./eleve_has_matiere.model")(sequelize, Sequelize);
-db.eleve = require("./eleve.model")(sequelize, Sequelize);
-db.exercices = require("./exercices.model")(sequelize, Sequelize);
-db.format_exercice = require("./format_exercice.model")(sequelize, Sequelize);
-db.images = require("./images.model")(sequelize, Sequelize);
-db.lesson = require("./lesson.model")(sequelize, Sequelize);
-db.matiere = require("./matiere.model")(sequelize, Sequelize);
+db.eleveHasMatiere = require("./eleve_has_matiere.model")(sequelize, Sequelize);
+db.matieres = require("./matiere.model")(sequelize, Sequelize);
+db.classe_lesson = require("./classe_lesson.model")(sequelize, Sequelize);
+
+// MPD Compétences
 db.metacomp = require("./metacomp.model")(sequelize, Sequelize);
-db.natureactiv_phaseapp = require("./natureactiv_phaseapp.model")(sequelize, Sequelize);
-db.natureactiv = require("./natureactiv.model")(sequelize, Sequelize);
-db.param_rep_image = require("./param_rep_image.model")(sequelize, Sequelize);
-db.parent_has_enfant = require("./parent_has_enfant.model")(sequelize, Sequelize);
-db.parent = require("./parent.model")(sequelize, Sequelize);
-db.phaseapp = require("./phaseapp.model")(sequelize, Sequelize);
-db.professeur = require("./professeur.model")(sequelize, Sequelize);
-db.rep_img = require("./rep_img.model")(sequelize, Sequelize);
-db.rep_txt = require("./rep_txt.model")(sequelize, Sequelize);
-db.reponses_exos = require("./reponses_exos.model")(sequelize, Sequelize);
-db.reponses_memory = require("./reponses_memory.model")(sequelize, Sequelize);
-db.reponses_paires = require("./reponses_paires.model")(sequelize, Sequelize);
-db.reponses_trous = require("./reponses_trous.model")(sequelize, Sequelize);
-db.reponses = require("./reponses.model")(sequelize, Sequelize);
+db.catcomp = require("./catcomp.model")(sequelize, Sequelize);
+db.compgen = require("./c_cc_cg.model")(sequelize, Sequelize);
+db.dependCompgen = require("./dep_cg.model")(sequelize, Sequelize);
+db.compspec = require("./cg_cs.model")(sequelize, Sequelize);
+
+// MPD Exercices
+db.pApp = require("./papp.model")(sequelize, Sequelize);
+db.nAc = require("./nac.model")(sequelize, Sequelize);
+db.nAc_pApp = require("./nac_papp.model")(sequelize, Sequelize);
+db.activiteRequiert_CompSpec = require("./ac_cs.model")(sequelize, Sequelize);
+db.activite = require("./ac_clnt.model")(sequelize, Sequelize);
+db.exercices = require("./exercices.model")(sequelize, Sequelize);
+db.Rep_txt = require("./Rep_txt.model")(sequelize, Sequelize);
+db.Rep_Img = require("./Rep_Img.model")(sequelize, Sequelize);
+db.reponse_exos = require("./reponse_exos.model")(sequelize, Sequelize);
+db.reponse_memory = require("./reponse_memory.model")(sequelize, Sequelize);
+db.reponse_paires = require("./reponse_paires.model")(sequelize, Sequelize);
+db.reponse_trous = require("./reponse_trous.model")(sequelize, Sequelize);
+db.reponse_dessin_points = require("./reponse_dessin_points.model")(sequelize, Sequelize);
 db.score_eleves = require("./score_eleves.model")(sequelize, Sequelize);
-db.type_exercice = require("./type_exercice.model")(sequelize, Sequelize);
+db.type_exercice = require("./type_exo.model")(sequelize, Sequelize);
+db.param_rep_image = require("./param_rep_image.model")(sequelize, Sequelize);
+db.lessons = require("./lesson.model")(sequelize, Sequelize);
+db.images = require("./images.model")(sequelize, Sequelize);
 
 /**
- * create dependencies between models
+ * créer des dépendances entre les modèles
  */
 
-db.activite.belongsTo(db.lesson, { foreignKey: "FK_lesson_id" });
-db.lesson.hasMany(db.activite, { foreignKey: "FK_lesson_id" });
+// parent <=> enfant
+db.parents.belongsToMany(db.eleves, {through: "parent_has_enfant", foreignKey: "parent_id",});
+db.eleves.belongsToMany(db.parents, {through: "parent_has_enfant", foreignKey: "eleve_id",});
 
-// db.activite.belongsTo(db.classe, { foreignKey: "FK_classe_id" });
-// db.classe.hasMany(db.activite, { foreignKey: "FK_classe_id" });
+// classe <=> prof
+db.classes.belongsToMany(db.professeurs, {through: "classe_prof", foreignKey: "classe_id",});
+db.professeurs.belongsToMany(db.classes, {through: "classe_prof", foreignKey: "professeur_id",});
 
+// eleve <=> matiere
+db.eleves.belongsToMany(db.matieres, {through: "eleve_has_matiere", foreignKey: "eleve_id",});
+db.matieres.belongsToMany(db.eleves, {through: "eleve_has_matiere", foreignKey: "matiere_id",});
 
+// classe <=> lesson
+db.classes.belongsToMany(db.lessons, {through: "classe_lesson", foreignKey: "classe_id",});
+db.lessons.belongsToMany(db.classes, {through: "classe_lesson", foreignKey: "lesson_id",});
 
-db.classe.belongsToMany(db.lesson, { through: "classe_lesson", foreignKey: "FK_classe_id",});
-db.lesson.belongsToMany(db.classe, { through: "classe_lesson", foreignKey: "FK_lesson_id",});
+// natureactiv <=> phaseapp
+db.pApp.belongsToMany(db.nAc, {through: "nac_papp", foreignKey: "papp_id",});
+db.nAc.belongsToMany(db.pApp, {through: "nac_papp", foreignKey: "nac_id",});
 
-db.matiere.hasMany(db.metacomp, { foreignKey: "FK_matiere_id" });
-db.metacomp.belongsTo(db.matiere, { foreignKey: "FK_matiere_id" });
+// activite <=> compspec
+db.compspec.belongsToMany(db.activite, {through: "ac_cs", foreignKey: "cg_cs_id",});
+db.activite.belongsToMany(db.compspec, {through: "ac_cs", foreignKey: "ac_clnt_pk_ac_id",});
 
-db.metacomp.hasMany(db.catcomp, { foreignKey: "FK_metacomp_id" });
-db.catcomp.belongsTo(db.metacomp, { foreignKey: "FK_metacomp_id" });
+db.lessons.belongsToMany(db.eleves, {
+  through: "matiere_eleve",
+  foreignKey: "matiere_id",
+});
 
-db.catcomp.hasMany(db.lesson, { foreignKey: "FK_catcomp_id" });
-db.lesson.belongsTo(db.catcomp, { foreignKey: "FK_catcomp_id" });
+db.lessons.belongsToMany(db.matieres, {
+  through: "matiere_eleve",
+  foreignKey: "eleve_id",
+});
 
+db.matieres.hasMany(db.metacomp, { foreignKey: "fk_matiere_id" });
+db.metacomp.belongsTo(db.matieres, { foreignKey: "fk_matiere_id" });
 
+// catcomp => metacomp
+db.metacomp.hasMany(db.catcomp, { foreignKey: "fk_mc_id" });
+db.catcomp.belongsTo(db.metacomp, { foreignKey: "fk_mc_id" });
 
-db.exercices.belongsTo(db.activite, { foreignKey: "FK_activite_clnt_id" });
-db.activite.hasMany(db.exercices, { foreignKey: "FK_activite_clnt_id" });
+// compgen => catcomp
+db.catcomp.hasMany(db.compgen, { foreignKey: "fk_catcomp_id" });
+db.compgen.belongsTo(db.catcomp, { foreignKey: "fk_catcomp_id" });
 
+// compgen => classe
+db.classes.hasMany(db.compgen, { foreignKey: "Classe_ID" });
+db.compgen.belongsTo(db.classes, { foreignKey: "Classe_ID" });
 
-db.exercices.belongsTo(db.activite, { foreignKey: "PK_exercices_id" });
-db.activite.hasMany(db.exercices, { foreignKey: "PK_exercices_id" });
+// depend_compgen => classe_catcomp_has_compgen S
+db.compgen.hasMany(db.dependCompgen, { foreignKey: "fk_compgens_id" });
+db.dependCompgen.belongsTo(db.compgen, { foreignKey: "fk_compgens_id" });
 
+// depend_compgen => classe_catcomp_has_compgen T
+db.compgen.hasMany(db.dependCompgen, { foreignKey: "fk_compgent_id" });
+db.dependCompgen.belongsTo(db.compgen, { foreignKey: "fk_compgent_id" });
 
+// compgen_has_compspec => classe_catcomp_has_compgen
+db.compgen.hasMany(db.compspec, { foreignKey: "fk_compgen_id" });
+db.compspec.belongsTo(db.compgen, { foreignKey: "fk_compgen_id" });
 
+// activite => classe
+db.classes.hasMany(db.activite, { foreignKey: "Classe_ID" });
+db.activite.belongsTo(db.classes, { foreignKey: "Classe_ID" });
+
+// activite => lesson
+db.lessons.hasMany(db.activite, { foreignKey: "Lesson_ID" });
+db.activite.belongsTo(db.lessons, { foreignKey: "Lesson_ID" });
+
+// activite => type_exo
 db.type_exercice.hasMany(db.activite, { foreignKey: "typrep" });
 db.activite.belongsTo(db.type_exercice, { foreignKey: "typrep" });
 
-db.type_exercice.hasMany(db.reponses_exos, { foreignKey: "FK_type_exercice_id" });
-db.reponses_exos.belongsTo(db.type_exercice, { foreignKey: "FK_type_exercice_id" });
+// activite => natureactiv
+db.nAc.hasMany(db.activite, { foreignKey: "nac_id" });
+db.activite.belongsTo(db.nAc, { foreignKey: "nac_id" });
 
-db.exercices.hasMany(db.reponses_exos, { foreignKey: "FK_exercices_id" });
-db.reponses_exos.belongsTo(db.exercices, { foreignKey: "FK_exercices_id" });
+// exercices => activite
+db.activite.hasMany(db.exercices, { foreignKey: "fk_activite_id" });
+db.exercices.belongsTo(db.activite, { foreignKey: "fk_activite_id" });
+
+// Rep_Img => images
+db.images.hasMany(db.Rep_Img, { foreignKey: "FK_Img_id" });
+db.Rep_Img.belongsTo(db.images, { foreignKey: "FK_Img_id" });
+
+// reponses_exos => exercices
+db.exercices.hasMany(db.reponse_exos, { foreignKey: "fk_exo_id" });
+db.reponse_exos.belongsTo(db.exercices, { foreignKey: "fk_exo_id" });
+
+// reponses_exos => type_exo
+db.type_exercice.hasMany(db.reponse_exos, { foreignKey: "type_exercice" });
+db.reponse_exos.belongsTo(db.type_exercice, { foreignKey: "type_exercice" });
+
+// reponses_memory => exercices
+db.exercices.hasMany(db.reponse_memory, { foreignKey: "FK_Exo_ID" });
+db.reponse_memory.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+
+// reponses_paires => exercices
+db.exercices.hasMany(db.reponse_paires, { foreignKey: "FK_Exo_ID" });
+db.reponse_paires.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+
+// reponses_trous => exercices
+db.exercices.hasMany(db.reponse_trous, { foreignKey: "FK_Exo_ID" });
+db.reponse_trous.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+
+// reponses_dessin_points => exercices
+db.exercices.hasMany(db.reponse_dessin_points, { foreignKey: "FK_Exo_ID" });
+db.reponse_dessin_points.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+
+// score_eleves => eleve
+db.eleves.hasMany(db.score_eleves, { foreignKey: "FK_eleve_id" });
+db.score_eleves.belongsTo(db.eleves, { foreignKey: "FK_eleve_id" });
+
+// score_eleves => exercices
+db.exercices.hasMany(db.score_eleves, { foreignKey: "FK_exercices_id" });
+db.score_eleves.belongsTo(db.exercices, { foreignKey: "FK_exercices_id" });
+
+// param_rep_image => exercices
+db.exercices.hasMany(db.param_rep_image, { foreignKey: "FK_exercice_id" });
+db.param_rep_image.belongsTo(db.exercices, { foreignKey: "FK_exercice_id" });
+
+// param_rep_image => images
+db.images.hasMany(db.param_rep_image, { foreignKey: "FK_image_id" });
+db.param_rep_image.belongsTo(db.images, { foreignKey: "FK_image_id" });
+
+// param_rep_image => type_exo
+db.type_exercice.hasMany(db.param_rep_image, { foreignKey: "FK_reponse_id" });
+db.param_rep_image.belongsTo(db.type_exercice, { foreignKey: "FK_reponse_id" });
+
+// lesson => catcomp
+db.catcomp.hasMany(db.lessons, { foreignKey: "fk_catcomp_id" });
+db.lessons.belongsTo(db.catcomp, { foreignKey: "fk_catcomp_id" });
 
 module.exports = db;
 ```
 
 ## Contrôleurs
 
-- `./src/controllers/alecol.activite_clnt.controllers.js`
+- `./src/controllers/alecol.ac_clnt.controllers.js`
 
 ## Routes
 
-- `./src/routes/alecol.activite_clnt.routes.js`
+- `./src/routes/alecol.ac_clnt.routes.js`

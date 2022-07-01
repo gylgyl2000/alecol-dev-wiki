@@ -5,6 +5,11 @@
 ```js title="./src/models/eleve_has_matiere.model.js"
 module.exports = (sequelize, Sequelize) => {
     const EleveHasMatiere = sequelize.define("eleve_has_matiere", {
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
         fk_eleve_id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -12,6 +17,9 @@ module.exports = (sequelize, Sequelize) => {
         fk_matiere_id: {
             type: Sequelize.STRING,
             primaryKey: true,
+        },
+        nouveau: {
+            type: Sequelize.BOOLEAN,
         },
     });
 

@@ -227,3 +227,38 @@ module.exports = app => {
 require("./src/routes/alecol.exercice.routes")(app);
 ...
 ```
+
+```sql
+--
+-- Table structure for table `exercices`
+--
+
+DROP TABLE IF EXISTS `exercices`;
+CREATE TABLE IF NOT EXISTS `exercices` (
+  `fk_activite_id` varchar(24) NOT NULL,
+  `num_question` int(11) NOT NULL,
+  `actif` tinyint(4) NOT NULL,
+  `libelle` varchar(255) NOT NULL,
+  `question` varchar(5000) NOT NULL,
+  `nb_bonnes_rep` int(11) NOT NULL,
+  `nb_possible_rep` int(11) NOT NULL,
+  `pk_exo_id` varchar(100) GENERATED ALWAYS AS (concat(`fk_activite_id`,_utf8'-',`num_question`)) STORED,
+  `element_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`fk_activite_id`,`num_question`),
+  UNIQUE KEY `PK_Exo_ID` (`pk_exo_id`),
+  KEY `element_idfk` (`element_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `exercices`
+--
+
+INSERT INTO `exercices` (`fk_activite_id`, `num_question`, `actif`, `libelle`, `question`, `nb_bonnes_rep`, `nb_possible_rep`, `element_id`) VALUES
+('CP-AD1-I-1-R', 1, 1, 'L\'enfant doit relier les points', 'Relier les points ', 4, 256, 233),
+('CP-AD1-I-3-P', 1, 1, 'L\'enfant doit lier les éléments', 'Lie les éléments', 4, 8, 233),
+('CP-CD-F-1-B1', 1, 1, 'L\'enfant doit compter  (à voix haute ou mentalement) les éléments sur une image (en les pointant du doigt)', 'Sur ce dessin, combien vois-tu d\'autruches ?', 1, 2, 11),
+('CP-CD-F-1-M', 1, 1, 'L\'enfant doit compter  (à voix haute ou mentalement) les éléments sur une image (en les pointant du doigt)', 'Associe les cartes faisant correspondre les images avec le nombre correspondant', 4, 8, 233),
+('GSM-OS-I-3-S', 1, 1, 'L\'enfant doit trier les éléments', 'Trie les éléments', 4, 8, 233);
+```
+
+concat(`fk_activite_id`,_utf8mb3\'-\',`num_question`)

@@ -1,38 +1,43 @@
 import ReactJson from 'react-json-view'
 import ActiviteJSON from "./activite.json"
 
-# activite
-
 export const Highlight = ({children, color}) => (
-  <span
+<span
     style={{
-      backgroundColor: color,
-      borderRadius: '5px',
-      color: '#fff',
-      padding: '0.3rem 1rem',
-      fontWeight: 'bold',
+        backgroundColor: color,
+        borderRadius: '5px',
+        color: '#fff',
+        padding: '0.3rem 1rem',
+        fontWeight: 'bold',
     }}>
     {children}
   </span>
 );
 
+# activite
 
 <details>
     <summary>
         <Highlight color="#61affe">GET</Highlight>
         <span style={{fontSize: '125%', margin: '0 2rem 0 1rem'}}>
-            <b><code>/api/activite/</code></b>
+            <b><code>api/activite/</code></b>
         </span>
         Affiche toutes les activités
     </summary>
-      <div>activite.findAll</div>
+      <div style={{color: '#3b4151',
+        fontFamily: 'sans-serif',
+        fontSize: '100%',
+        margin: '0 0 5px',
+        padding: '15px 20px'}}>Renvoie toutes les activités</div>
       <ReactJson
             src={ActiviteJSON}
+            name={false}
             theme="monokai"
             iconStyle="triangle"
-            collapsed={true}
+            collapsed={false}
             displayDataTypes={false}
-            indentWidth={2}
+            displayObjectSize={false}
+            indentWidth={4}
          />
 </details>
 

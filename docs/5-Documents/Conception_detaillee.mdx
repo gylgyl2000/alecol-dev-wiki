@@ -3,7 +3,7 @@ import TabItem from '@theme/TabItem';
 
 # Conception détaillée
 
-## I. Architecture Générale
+## Architecture Générale
 
 Le schéma suivant représente l’architecture générale du site ainsi que les différents composants qui le permettent de fonctionner correctement.
 
@@ -33,7 +33,7 @@ qui est envoyé à la fin au frontend.
 - **Le contrôleur** : interroge la base de données à travers l’ORM et récupère les données, puis les envois au frontend.
 - **ORM** : c’est la partie qui lie chaque model à la table correspondante de la base de données.
 
-## II. Gestion d’état
+## Gestion d’état
 
 ### 1. Définition
 
@@ -44,26 +44,21 @@ dit, l'état d'un composant est un objet qui contient des informations susceptib
 
 - React peut regrouper plusieurs appels de `setState()` dans une mise à jour unique pour la performance. Étant donné que les props et le state peuvent être mis à
 jour de manière asynchrone, il ne faut pas faire confiance à leurs valeurs pour calculer l'état suivant.<br />
-<br />
 Un exemple simple serait d’itérer sur la liste des matières reçue, et de stocker cette liste dans l’état. Dans ce cas, il faut itérer sur la liste toute en se
 basant sur l’état précédant pour le mettre à jour à chaque fois.<br />
-<br />
-La solution est d’utiliser la version surchargée du la fonction `setState()`, qui consiste à passer une fonction à celle-ci en passant l’état précédant en paramètre.<br /><br />
+La solution est d’utiliser la version surchargée du la fonction `setState()`, qui consiste à passer une fonction à celle-ci en passant l’état précédant en paramètre.
 - Dans certain cas, on peut avoir besoin d’une donnée considéré comme globale dans plusieurs composants différents.<br />
-<br />
 Comment faire par exemple pour stocker une référence vers la première carte choisie (exercice memory), et de comparer celle-ci avec la deuxième carte choisie.<br />
-<br />
 Une idée est d’utiliser **Context API** qui permet de rendre les données globales, dans ce cas une référence vers la première carte sera stockée et au moment où la
 deuxième carte est choisi on peut la comparer avec la première carte.<br />
-<br />
 **Context API** permet aussi d’éviter ce qu’on appelle le **Prop Drilling** qui est tout simplement le fait de devoir passer une information d’un composant parent à
 un composant enfant en passant par tous les composants entre eux qui n’ont pas besoin de cette information.
 
-## III. Les types d’exercices
+## Les types d’exercices
 
-### a. Exercice de type « sélection »
+### 1. Exercice de type « sélection »
 
-```js title="Code 1 : Proposition de type Sélection"
+```js title="Code 1 : Proposition de type Sélection - src/Components/atoms/proposition/Proposition.js"
     return (
         <div classeName="proposition__container">
             <button
@@ -83,7 +78,7 @@ un composant enfant en passant par tous les composants entre eux qui n’ont pas
 Le clic sur un bouton exécute la fonction `clickHandler` qui ajoute la chaine « `activeChoice` » à la liste des classeName du bouton (code 2), ce qui permet de
 récupérer les éléments qui contient cette chaine au moment de l’évaluation et les comparer avec la liste des réponses juste (code 3).
 
-```js title="Code 2 : Le bloc exécuté quand un bouton est appuyé"
+```js title="Code 2 : Le bloc exécuté quand un bouton est appuyé - src/Components/atoms/proposition/Proposition.js"
 const clickHandler = (e) => {
     if (e.target.classList.contains("activeChoice")) {
         e.target.classList.remove("activeChoice");
@@ -99,9 +94,9 @@ a échoué à l’exercice.
 Si le nombre de réponses choisi (liste 1) est égale au nombre de réponses juste (liste 2) on vérifie si chaque élément de la première liste existe dans la deuxième
 liste.
 
-Le tableau `arr` contient les éléments sélectionnés par l’utilisateur, celui-ci est comparé avec les réponses juste stocké dans le tableau `reponses` (ligne 23).
+Le tableau `arr` contient les éléments sélectionnés par l’utilisateur, celui-ci est comparé avec les réponses justes stockées dans le tableau `reponses` (ligne 23).
 
-```js title="Code 3 : fonction d'évaluation" showLineNumbers
+```js title="Code 3 : fonction d'évaluation- src/strategies/Type_Select.js" showLineNumbers
 const evaluate() {
     // récupérer les réponses choisies par l'utilisateur sous forme de nodes html
     const activeResponses = document.getElementsByClassName("activeChoice");
@@ -146,123 +141,669 @@ const evaluate() {
 }
 ```
 
-### b. Exercice de type « drag and drop »
+### 2. Exercice de type « drag and drop »
 
+```js title="Code 1 : proposition de type drag and drop - src/Components/atoms/proposition/Proposition.js"
+    return (
+        <div
+            id={`proposition__container${props.id}`}
+            className={`proposition__container`}
+            draggable="true"
+            onDragStart={(e) => drag(e)}
+        >
+            <h2 className={`reponse__item ${props.class}`}>
+                <strong>{props.proposition}</strong>
+            </h2>
+        </div>
+    )
+```
 
-Figure 1 : Proposition de type drag and drop
+Il faut tout d’abord permettre de glisser déposer dans les deux zones (zone des réponses possibles et la zone de réponses), donc on rend l’élément glissable avec
+`draggable="true"` (code 1).
 
-Il faut tout d’abord permettre de glisser déposer dans les deux zones (zone des réponses possibles et la zone de réponses), donc on rend l’élément glissable avec draggable= «true» (figure 1).
- 
-On a besoin maintenant d’une fonction drag (figure 1 et 2) de glissement qui permettra d’enregistrer l’élément glissable dans un évènement.
+On a besoin maintenant d’une fonction **drag** (codes 1 et 2) de glissement qui permettra d’enregistrer l’élément glissable dans un évènement.
 
+```js title="Code 2 : fonction permettant de glisser un élément - src/js/choixController.js"
+export const drag = (ev) => {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+```
 
-Figure 2 : fonction permettant de glisser un élément
+On peut maintenant définir la méthode **drop** (code 3) qui permettra de déposer l’élément à la position souhaité.
 
+Comme vous pouvez le remarquer, la chaine **« activeChoice »** est utilisé ici pour identifier les réponses dans la zone de réponses.
 
-On peut maintenant définir la méthode drop (figure 3) qui permettra de déposer l’élément à la position souhaité.
-Comme vous pouvez le remarquer, la chaine « activeChoice » est utilisé ici pour identifier les réponses dans la zone de réponses.
-	
-Figure 3 : fonction qui permet de déposer un élément
+```js title="Code 3 : fonction qui permet de déposer un élément - src/js/choixController.js"
+export const drop = (ev) => {
+    ev.preventDefault();
 
+    //on récupère l'élément glissé à partir de l'évènement
+    var data = ev.dataTransfer.getData("text");
+    var element = document.getElementById(data);
+    var childElement = element.querySelector(".reponse__item");
 
+    /**
+     * si cet élément est ajouté à la zone de réponses alors on ajoute la chaîne activeChoice
+     * à la liste des className dans le cas contraire en enlève cette chaîne de sa liste de className
+     */
+    if (ev.target.classList.contains("reponses__zone")) {
+        childElement.classList.add("activeProposition");
+        childElement.classList.add("activeChoice");
+    } else if (ev.target.classList.contains("choice__container")) {
+        childElement.classList.remove("activeProposition");
+        childElement.classList.remove("activeChoice");
+    }
 
-L’état state est un objet qui contient deux listes, une liste items qui correspond aux éléments non sélectionnés et une deuxième liste selected qui correspond aux éléments sélectionnés.
+    /**
+     * on positionne l'élément à l'endroit où il était déposé
+     */
+    element.style.position = "absolute";
+    element.style.top = `${ev.clientY - (window.screen.height * 10) / 100}px`;
+    element.style.left = `${ev.clientX}px`;
 
-Le fait de glisser une réponse possible vers la zone de réponses ajoute la chaine « activeChoice » à la liste des classeName du bouton, ce qui permet de récupérer les éléments qui contient cette chaine au moment de l’évaluation et de les comparer avec la liste des réponses juste.
+    ev.target.appendChild(element);
+};
+```
 
+```js title="src/strategies/Type_Dnd.js"
+    <div
+        className="exercice__zone"
+        onDrop={(e) => drop(e)}
+        onDragOver={(e) => allowDrop(e)}
+    >
+        <div className={className}>
+            {this.state.items
+                ? this.state.items.map((s, i) => {
+                    return (
+                        <div className="fixed__box" key={i}>
+                            <Proposition
+                                key={s.id}
+                                id={s.id}
+                                proposition={s.libelle}
+                                type={this.state.type}
+                                index={i}
+                            />
+                        </div>
+                    );
+                })
+                : null}
+        </div>
+        <div
+            className="reponses__zone"
+            onDrop={(e) => drop(e)}
+            onDragOver={(e) => allowDrop(e)}
+        >
+            {this.state.selected
+                ? this.state.selected.map((s, i) => {
+                    return (
+                    <Proposition
+                        key={s.id}
+                        id={s.id}
+                        proposition={s.libelle}
+                        type={this.state.type}
+                        index={i}
+                        class="activeChoice activeProposition"
+                    />
+                    );
+                })
+                : null}
+            </div>
+        </div>
+```
 
+L’état **state** est un objet qui contient deux listes : une liste items, qui correspond aux éléments non sélectionnés et une deuxième liste **selected** qui
+correspond aux éléments sélectionnés.
 
+Le fait de glisser une réponse possible vers la zone de réponses ajoute la chaine **« activeChoice »** à la liste des `classeName` du bouton, ce qui permet de
+récupérer les éléments qui contient cette chaine au moment de l’évaluation et de les comparer avec la liste des réponses juste.
 
+### 3. Exercice de type « Memory »
 
-    c. Exercice de type « Memory »
+Le jeu se compose de paires de cartes portant des illustrations identiques. L’élève retourne deux cartes de son choix. S'il découvre deux cartes identiques, elles
+restent visibles. Si les cartes ne sont pas identiques, elles sont retournées faces cachées.
 
-Le jeu se compose de paires de cartes portant des illustrations identiques. L’élève retourne deux cartes de son choix. S'il découvre deux cartes identiques, ils restent visibles. Si les cartes ne sont pas identiques, ils sont retournés faces cachées. 
 Le jeu se termine quand toutes les paires de cartes ont été découvertes.
-Quand l’élève découvre deux cartes identiques, la chaine « activeChoice » est ajoutée à la liste des className de la première carte, ce qui permettra de les récupérer par la suite pour appliquer la même méthode d’évaluation que les autres types d’exercices. 
-    • Fonctionnement
 
-            Figure 4: Rendu visuel de la carte
+Quand l’élève découvre deux cartes identiques, la chaine **« activeChoice »** est ajoutée à la liste des `className` de la première carte, ce qui permettra de les
+récupérer par la suite pour appliquer la même méthode d’évaluation que les autres types d’exercices.
 
-En cliquant sur une carte la fonction « flipCard » est exécuté qui stocke une référence vers la première carte dans un état global (Context API), si la première carte est déjà choisie alors la fonction « flipCard » stocke la deuxième carte dans un autre état global.
+- Fonctionnement
 
+```js title="Code 1 : rendu visuel de la carte - src/Components/atoms/proposition/Proposition.js"
+    return (
+        <div
+            className={`proposition__container ${props.class}`}
+            onClick={props.flipCard}
+        >
+            <h1>{props.proposition}</h1>
+        </div>
+    );
+```
 
+En cliquant sur une carte, la fonction **« flipCard »** est exécutée qui stocke une référence vers la première carte dans un état global (**Context API**), si la
+première carte est déjà choisie alors la fonction **« flipCard »** stocke la deuxième carte dans un autre état global.
 
-Quand l’un de ces deux états globaux est initialisé, la fonction useEffect est déclenché, ce qui permettra d’exécuter la fonction « showCard », cette dernière change l’état de la carte à « tournée » et incrémente la valeur de l’état « cardFlipped » qui représente le nombre de cartes tournées.
+```js title="Code 2 - src/Components/atoms/card/Card.js"
+    const flipCard = (e) => {
+        let targetCard = e.target;
 
+        if (!e.target.attributes.id) targetCard = e.target.parentNode;
 
+        if (isFlipped) {
+            if (visibleCards < 2) {
+                if (!firstChosenCard) {
+                    setFirstChosenCard(targetCard);
+                } else if (!secondChosenCard) {
+                    setSecondChosenCard(targetCard);
+                }
+            }
+        }
+    };
+```
 
+Quand l’un de ces deux états globaux est initialisé, la fonction **useEffect** est déclenchée, ce qui permettra d’exécuter la fonction **« showCard »**, cette
+dernière change l’état de la carte à **« tournée »** et incrémente la valeur de l’état **« cardFlipped »** qui représente le nombre de cartes tournées.
 
+```js title="Code 3 - src/Components/atoms/card/Card.js"
+    /**
+    * *Si la première carte est choisie ce code est exécuté
+    * *pour afficher cette dernière.
+    */
+    useEffect(() => {
+        if (firstChosenCard && props.id === firstChosenCard.attributes.id.value) {
+            showCard();
+        }
+    }, [firstChosenCard]);
+    /**
+     * *Si la deuxième carte est choisi ce bout de code est exécuté
+     * *pour afficher cette dernière.
+     */
+    useEffect(() => {
+        if (secondChosenCard && props.id === secondChosenCard.attributes.id.value) {
+            showCard();
+        }
+    }, [secondChosenCard]);
+```
 
-Quand l’état cardFlipped atteint la valeur 2, une autre fonction useEffect est déclenché, cette dernière exécute la fonction « evaluate » qui change la valeur de l’état « Match », donc cet état prend la valeur « no match » quand les cartes ne sont pas identiques, sinon prend la valeur «match», dans le premier cas un setTimout est mis en place et les cartes sont retournés faces cachées, dans le cas de « match », les deux cartes restent visibles.  
+```js title="Code 4 - src/Components/atoms/card/Card.js"
+    const showCard = () => {
+        setIsFlipped(false);
+        setVisibleCards((cardFlipped) => cardFlipped + 1);
+    };
+```
 
+Quand l’état **cardFlipped** atteint la valeur 2, une autre fonction **useEffect** est déclenchée, cette dernière exécute la fonction **« evaluate »** qui change
+la valeur de l’état **« Match »**, donc cet état prend la valeur **« no match »** quand les cartes ne sont pas identiques, sinon prend la valeur **« match »**,
+dans le premier cas un **setTimout** est mis en place et les cartes sont retournées faces cachées, dans le cas de **« match »**, les deux cartes restent visibles.
 
+```js title="Code 5 - src/Components/atoms/card/Card.js"
+    const showCard = () => {
+        setIsFlipped(false);
+        setVisibleCards((cardFlipped) => cardFlipped + 1);
+    };
+```
 
-PS : la même fonction générique est utilisée pour évaluer les différents types d’exercices, la méthode consiste à ajouter la chaine de caractère « activeChoice » à la liste des className de la réponse choisie pour ensuite les récupérer et les comparer avec la liste des réponses juste. La méthode est nommée « evaluate » et fait partie du composant « Step » dans le fichier Step.js
-    • Pseudo-code
+```js title="Code 6 - src/Components/atoms/card/Card.js"
+    useEffect(() => {
+        if (cardFlipped === 2) evaluate();
+    }, [cardFlipped]);
+```
 
-    d. Exercice de type « Link »
-L’exercice de type link permet de lier les éléments qui se correspond, sachant que les éléments à gauche sont des textes et les éléments à droite sont des images.
+```js title="Code 7 - src/Components/atoms/card/Card.js"
+    const evaluate = () => {
+        if (secondChosenCard) {
+            if (
+                firstChosenCard.attributes.proposition.value.localeCompare(
+                    secondChosenCard.attributes.proposition.value
+                ) === 0
+            ) {
+                setMatch("match");
+                firstChosenCard.classList.add("activeChoice");
+            } else {
+                setMatch("no match");
+            }
+        }
+    };
+```
 
-La méthode firstClickHandler sert à récupérer le texte choisi et la méthode secondClickHandler sert à récupérer l’image choisi correspondante. 
+```js title="Code 8 - src/Components/atoms/card/Card.js"
+    useEffect(() => {
+        if (match === "match") {
+            setFirstChosenCard(null);
+            setSecondChosenCard(null);
+            setCardFlipped(0);
+            setMatch("");
+        } else if (match === "no match") {
+            setTimeout(hideCard, 2000);
+            setFirstChosenCard(null);
+            setSecondChosenCard(null);
+            setMatch("");
+        }
+    }, [match]);
+```
 
+**PS :** la même fonction générique est utilisée pour évaluer les différents types d’exercices, la méthode consiste à ajouter la chaine de caractère **« activeChoice »**
+à la liste des `className` de la réponse choisie pour ensuite les récupérer et les comparer avec la liste des réponses juste. La méthode est nommée **« evaluate »**
+et fait partie du composant **« Step »** dans le fichier `Step.js`.
 
-Dès que les deux éléments sont choisis, on crée une flèche du premier texte choisi vers l’image correspondante avec la bibliothèque React LeaderLine et on réinitialise les deux états correspondant au texte et à l’image sélectionnés.
+- Pseudo-code
 
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-TE03.png"
+         alt="Algorithme 1 : Jeu de type Memory" />
+    <figcaption></figcaption>
+</figure>
 
-    e. Exercice de type « Fill » ou « phrases à trous »
-Cet exercice concerne les phrases à trous mais aussi le calcul posé, l’idée est d’avoir des cases vides à certains positions, ces positions sont stockées dans la table reponse avec les réponses justes.
-Pour une phrase à trous, on spécifie les réponses justes et ses positions de cette façon dans la base de données : 
+### 4. Exercice de type « Link »
 
+L’exercice de type link permet de lier les éléments qui se correspondent, sachant que les éléments à gauche sont des textes et les éléments à droite sont des images.
 
+```js title="Code 1 - src/Components/atoms/proposition/Proposition.js"
+    else if (props.type === "Type_Link") {
+        if (props.choice) {
+            return (
+                <div
+                    id={`proposition__container${props.id}`}
+                    className={`proposition__container`}
+                    onClick={(e) => props.firstClickHandler(e)}
+                >
+                    <h2 className={`reponse__item ${props.class}`}>
+                        <strong data-id={props.id}>{props.proposition}</strong>
+                    </h2>
+                </div>
+            );
+        } else {
+            return (
+                <div
+                    id={`proposition__container${props.id}`}
+                    className={`proposition__container proposition__image`}
+                    onClick={(e) => props.secondClickHandler(e)}
+                >
+                    <img src={props.proposition} alt={props.nom} />
+                </div>
+            );
+        }
+    }
+```
 
+La méthode **firstClickHandler** sert à récupérer le texte choisi et la méthode **secondClickHandler** sert à récupérer l’image choisi correspondante.
 
-En récupérant ces réponses, on peut savoir où insérer les cases vides. Le code ci-après permet de transformer la phrase en question à un tableau de mots, d’insérer la case vide à la bonne position et de reconstruire la phrase.
+```js title="Code 2 - src/Components/molecules/step/Step.js"
+    /**
+     *  * initialise le texte choisi dans le cas d'exercice link
+     *
+     * @function firstClickHandler
+     * @param {Event} e click event
+     */
+
+    const firstClickHandler = (e) => {
+        console.log(e.target);
+        setChoice(e.target);
+    };
+
+    /**
+     *  * initialise l'image choisi dans le cas d'exercice link
+     *
+     * @function secondClickHandler
+     * @param {Event} e click event
+     */
+
+    const secondClickHandler = (e) => {
+        console.log(e.target);
+        setImage(e.target);
+    };
+```
+
+Dès que les deux éléments sont choisis, on crée une flèche du premier texte choisi vers l’image correspondante avec la bibliothèque **React LeaderLine** et on
+réinitialise les deux états correspondant au texte et à l’image sélectionnés.
+
+```js title="Code 3 - src/Components/molecules/step/Step.js"
+    /**
+     * * Au moment où le choix et l'image sont définis on dessine la ligne entre ces deux derniers
+     */
+
+    useEffect(() => {
+        if (choice && image) {
+            new LeaderLine(choice, image);
+            setImage(null);
+            setChoice(null);
+        }
+    }, [choice, image]);
+```
+
+### 5. Exercice de type « Fill » ou « phrases à trous »
+
+Cet exercice concerne les phrases à trous mais aussi le calcul posé, l’idée est d’avoir des cases vides à certaines positions, ces positions sont stockées dans la
+table **reponse** avec les réponses justes.
+
+Pour une phrase à trous, on spécifie les réponses justes et ses positions de cette façon dans la base de données :
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-TE05a.png"
+         alt="" />
+    <figcaption></figcaption>
+</figure>
+
+En récupérant ces réponses, on peut savoir où insérer les cases vides. Le code ci-après permet de transformer la phrase en question à un tableau de mots, d’insérer
+la case vide à la bonne position et de reconstruire la phrase.
+
+```js title="Code 1 - src/Components/molecules/step/Step.js"
+    if (done) {
+        if (props.questionType === "texte") {
+            reponses.forEach((reponse, i) => {
+                array.splice(
+                    reponse.nom,
+                    0,
+                    <div
+                        id={`vide ${reponse.nom}`}
+                        className="vide"
+                        onDragOver={(e) => allowDrop(e)}
+                        onDrop={(e) => fillDrop(e)}
+                    ></div>
+                );
+            });
+
+            setDone(false);
+            setLibelle(array.reduce((prev, curr) => [prev, " ", curr]));
+            setConsigne(props.consigne);
+            setLibelle((libelle) => (
+                <div className="libelle__border">{libelle}</div>
+            ));
+        }
+    }
+```
 
 L’évaluation se fait en vérifiant la position du texte glissé mais aussi en vérifiant l’intitulé du texte.
-Concernant le calcul posé, une liste de réponses correspondant à des identifiants d’images est stockée dans la table reponse de la base de données, ces images représentent les chiffres de 0 à 9 avec lesquelles l’enfant peut former un nombre.
+
+Concernant le calcul posé, une liste de réponses correspondant à des identifiants d’images est stockée dans la table **reponse** de la base de données, ces images
+représentent les chiffres de 0 à 9 avec lesquelles l’enfant peut former un nombre.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-TE05b.png"
+         alt="" />
+    <figcaption></figcaption>
+</figure>
 
 Le code suivant initialise les cases vides qu’on va ajouter par la suite à l’ensemble du calcul posé.
 
-Le code suivant analyse le texte et récupère tout d’abord le signe de l’opération, on récupère par la suite les deux nombres de l’opération et on initialise le texte de l’opération toute en insérant les cases vides à la fin.
+
+```js title="Code 2 - src/Components/molecules/step/Step.js"
+    else if (props.questionType !== "texte") {
+        reponses.forEach((reponse, i) => {
+            setVides((vides) => [
+                ...vides,
+                <div
+                    id={`vide ${i}`}
+                    className="vide empty__box"
+                    onDragOver={(e) => allowDrop(e)}
+                    onDrop={(e) => imageDrop(e)}
+                ></div>,
+            ]);
+        });
+        setDone(false);
+    }
+```
+
+Le code suivant analyse le texte et récupère tout d’abord le signe de l’opération, on récupère par la suite les deux nombres de l’opération et on initialise le
+texte de l’opération tout en insérant les cases vides à la fin.
+
+```js title="Code 3 - src/Components/molecules/step/Step.js"
+    useEffect(() => {
+        if (props.type === "Type_Fill" && props.questionType !== "texte") {
+            setConsigne(props.consigne);
+            let characters = [...props.libelle];
+            let sign = "";
+
+            characters.forEach((char, i) => {
+                if (isNaN(char)) {
+                    sign = char;
+                    return;
+                }
+            });
+
+            let line1 = props.libelle.substring(0, props.libelle.indexOf(sign));
+            let line2 = props.libelle.substring(
+                props.libelle.indexOf(sign) + 1,
+                props.libelle.length
+            );
+
+            setLibelle((libelle) => (
+                <div className="addition__posee">
+                    <img src={blackboard} alt="blackboard" />
+                    <div className="first__number">{line1}</div>
+                    <div className="second__row--container">
+                        <div className="sign">{sign}</div>
+                        <div className="second__number">{line2}</div>
+                    </div>
+                    <div className="vides__boxes">{vides}</div>
+                </div>
+            ));
+        }
+    })
+```
+
+L’évaluation se fait en vérifiant la position de l’image glissée mais aussi en vérifiant si son identifiant correspond au texte enregistré dans la base de données
+comme le montre le code ci-dessous.
 
 
-L’évaluation se fait en vérifiant la position du l’image glissé mais aussi en vérifiant si son identifiant correspond au texte enregistré dans la base de données comme le montre le code ci-dessous.
+```js title="Code 4 - src/strategies/Type_Fill.js"
+    else if (props.type === "Type_Fill" && props.questionType !== "texte") {
+        let b = true;
+        vides.forEach((vide, i) => {
+            if (
+                document
+                    .getElementById(`vide ${i}`)
+                    .id.slice(5, getElementById(`vide ${i}`).id.length) !==
+                        reponses[i].libelle ||
+                document
+                    .getElementById(`vide ${i}`).firstChild.id !==
+                        reponses[i].libelle
+            ) {
+                b = false;
+                return;
+            }
+        });
+        return b;
+    }
+```
 
+### 6. Exercice de type « Sériation »
 
+Ce type d’exercice permet de ranger des éléments suivant la taille, le poids, la valeur…, pour le faire fonctionner on doit stocker les noms des images dans la
+table de choix, ces images doivent être stockées dans le dossier `src/Data/Images`.
 
-    f. Exercice de type « Sériation » : 
-Ce type d’exercice permet de ranger des éléments suivant la taille, le poids, la valeur …, pour le faire fonctionner on doit stocker les noms des images dans la table de choix, ces images doivent être stocké dans le dossier src/Data/Images.
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-TE06a.png"
+         alt="" />
+    <figcaption></figcaption>
+</figure>
 
 La prochaine étape est de stocker l’ordre et les identifiants des images dans la table réponse.
 
-Pour pouvoir afficher l’image il faut lire le nom de l’image à partir de la base de données et l’insérer par la suite dans le dom donc il faut appeler la méthode require dans la méthode map.
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-TE06b.png"
+         alt="" />
+    <figcaption></figcaption>
+</figure>
 
+Pour pouvoir afficher l’image il faut lire le nom de l’image à partir de la base de données et l’insérer par la suite dans le dom, donc il faut appeler la méthode
+*require* dans la méthode *map*.
 
-La fonction seriationDrop permet de récupérer l’image glissé ainsi que l’image de destination, on récupère par la suite le conteneur de chacune des images, et pour chaque conteneur on définit l’image opposé comme enfant du conteneur.
+```js title="Code 1 - src/strategies/Type_Seriation.js"
+    render() {
+        return (
+            <div className="seriation__container">
+                {this.props.choices.map((choice, i) => {
+                    const image = require(`../Data/Images/${choice.libelle}`);
+                    return (
+                        <div
+                            id={`object__container ${i}`}
+                            className="object__container"
+                            onDrop={(e) => seriationDrop(e)}
+                            onDragOver={(e) => allowDrop(e)}
+                        >
+                            <img
+                                id={`image__seriation ${choice.id}`}
+                                draggable="true"
+                                onDragStart={(e) => drag(e)}
+                                src={image.default}
+                                alt="objet"
+                            />
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    }
+```
 
+La fonction **seriationDrop** permet de récupérer l’image glissée ainsi que l’image de destination, on récupère par la suite le conteneur de chacune des images,
+et pour chaque conteneur on définit l’image opposée comme enfant du conteneur.
 
+```js title="Code 2 - src/js/choixController.js"
+export const seriationDrop = (ev) => {
+    ev.preventDefault();
 
-Pour évaluer le travail de l’enfant il faut vérifier tout d’abord si les positions des images sont bonnes ont comparant avec les valeurs dans la table reponse.
-On vérifie par la suite si l’identifiant de chaque image est égale à la valeur stocké dans la table réponse. 
- 
+    //on récupère l'élément glissée à partir de l'évènement
+    var data = ev.dataTransfer.getData("text");
+    var image1 = document.getElementById(data);
+    var image2 = ev.target;
+    var container1 = image1.parentNode;
+    var container2 = image2.parentNode;
 
+    container1.appendChild(image2);
+    container2.appendChild(image1);
+};
+```
 
+Pour évaluer le travail de l’enfant il faut vérifier tout d’abord si les positions des images sont bonnes en comparant avec les valeurs dans la table **reponse**.
 
-    IV. Le design pattern Strategy
-Au tout début du projet, un switch-case permettais de définir l’affichage selon le type de l’exercice, et a chaque fois qu’on voulait ajouter un autre type d’exercice, le code du switch-case devenait de plus en plus long.
-Cette implémentation ne respectait pas le principe open/closed, ce qui rendait le code de plus en plus non maintenable.
-La solution était d’implémenter le design pattern Strategy qui prend en compte le type de l’exercice et définit le type d’affichage lors de l’exécution.
-L’implémentation suivante représente la fameuse classe Context du design pattern Strategy, c’est elle qui permet de définir la stratégie au moment de l’exécution et donc d’appeler la méthode render adéquate.
+On vérifie par la suite si l’identifiant de chaque image est égal à la valeur stockée dans la table **reponse**.
 
+```js title="Code 3 - src/strategies/Type_Seriation.js"
+    evaluate() {
+        const containers = document.getElementsByClassName("object__container");
 
-L’image suivante montre les différentes stratégies qui représente chacune un type d’exercice.
+        const arrayOfContainers = [...containers];
+        let b = true;
 
+        arrayOfContainers.map((container, i) => {
+            let image = container.firstChild;
 
+            if (container.id !== `object__container ${this.props.choices[i].nom}`) {
+                b = false;
+                return;
+            }
+            if (image.id !== `image__seriation ${this.props.choices[i].libelle}`) {
+                b = false;
+                return;
+            }
+            return b;
+        });
+        return b;
+    }
+```
 
+## Le design pattern Strategy
 
-Chaque stratégie implémente la méthode render qui est appelé au moment de l’exécution.
+Au tout début du projet, un *switch-case* permettait de définir l’affichage selon le type de l’exercice et à chaque fois qu’on voulait ajouter un autre type
+d’exercice, le code du *switch-case* devenait de plus en plus long.
 
-Pour appliquer ce design pattern on initialise tout d’abord le Context TypeExerciceManager, et selon le type on récupère la stratégie, il suffit après d’affecter cette dernière au context et d’appeler la méthode render du context.
+Cette implémentation ne respectait pas le principe *open/closed*, ce qui rendait le code de moins en moins maintenable.
 
+La solution était d’implémenter le *design pattern Strategy* qui prend en compte le type de l’exercice et définit le type d’affichage lors de l’exécution.
 
-PS : il faut que le type d’exercice dans la base corresponde au nom de la stratégie crée.
+L’implémentation suivante représente la fameuse classe **Context** du *design pattern Strategy*, c’est elle qui permet de définir la stratégie au moment de
+l’exécution et donc d’appeler la méthode *render* adéquate.
+
+```js title="Code 1 - src/strategies/SelectionTypeExercice.js"
+class SelectionTypeExercice {
+    constructor() {
+        this._strategy = null;
+    }
+    set strategy(strategy) {
+        this._strategy = strategy;
+    }
+
+    get strategy() {
+        return this._strategy;
+    }
+
+    render() {
+        return this._strategy.render();
+    }
+}
+
+export default SelectionTypeExercice;
+```
+
+L’image suivante montre les différentes stratégies qui représentent chacune un type d’exercice.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-DPS01.png"
+         alt="" />
+    <figcaption></figcaption>
+</figure>
+
+Chaque stratégie implémente la méthode **render** qui est appelée au moment de l’exécution.
+
+```js title="Code 2 - src/strategies/Type_Flip.js"
+class Flip extends React.Component {
+    ...
+    render() {
+        return (
+            <div key={this.props.key} className={"choice__container flip__container"}>
+            {this.props.choices.map((choice, i) => {
+                return (
+                    <Card
+                        id={`choice${i}${this.props.step}`}
+                        key={`choice${i}${this.props.step}`}
+                        libelle={choice.libelle}
+                        type={this.props.type}
+                    />
+                );
+            })}
+
+            {this.props.reponses.map((reponse, i) => {
+                return (
+                    <Card
+                        id={`response${i}${this.props.step}`}
+                        key={`response${i}${this.props.step}`}
+                        libelle={reponse.choice}
+...
+```
+
+Pour appliquer ce *design pattern*, on initialise tout d’abord le *Context* **TypeExerciceManager**, et selon le type on récupère la stratégie. Il suffit après
+d’affecter cette dernière au *context* et d’appeler la méthode *render* du context.
+
+```js title="Code 3 - src/Components/molecules/step/Step.js"
+    const [TypeExerciceManager, setTypeExerciceManager] = useState(
+        new SelectionTypeExercice()
+    );
+
+    useEffect(() => {
+        if (props.type) {
+            const Exercice = new Strategies[`${props.type}`]({
+                ...props,
+                firstClickHandler: firstClickHandler,
+                secondClickHandler: secondClickHandler,
+            });
+
+            TypeExerciceManager.strategy = Exercice;
+        }
+    }, [props]);
+
+    if (TypeExerciceManager.strategy) {
+        return TypeExerciceManager.render();
+    } else {
+        return null;
+    }
+```
+
+**PS :** il faut que le type d’exercice dans la base corresponde au nom de la stratégie créée.
+
+<figure>
+    <img src="https://monwikidevweb.la-loutre.fr/img/docs/Alecol/assets/CD-DPS02.png"
+         alt="" />
+    <figcaption></figcaption>
+</figure>

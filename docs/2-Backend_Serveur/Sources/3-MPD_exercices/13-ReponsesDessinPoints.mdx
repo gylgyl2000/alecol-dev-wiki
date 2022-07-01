@@ -1,0 +1,148 @@
+# Réponses dessin à points
+
+## Service
+
+```js title="./src/services/alecol.reponse_dessin_points.service.js"
+import http from "../http-common";
+
+class ReponseDessinPointsDataService {
+    getAll() {
+        return http.get("/reponsesDessinPoints");
+    }
+
+    get(id) {
+        return http.get(`/reponsesDessinPoints/${id}`);
+    }
+
+    findByExoId(fk_exo_id) {
+        return http.get(`/reponsesDessinPoints?fk_exo_id=${fk_exo_id}`);
+    }
+}
+
+export default new ReponseDessinPointsDataService();
+```
+
+```js title="./src/services/index.js"
+const ReponseDessinPointsService = require("./alecol.reponse_dessin_points.service");
+...
+const Services = {};
+...
+Services.ReponseDessinPointsService = ReponseDessinPointsService.default;
+...
+export default Services;
+```
+
+-----
+
+## Modèle
+
+```js title="./src/models/reponse_dessin_points.model.js"
+module.exports = (sequelize, Sequelize) => {
+    const Reponses_dessin_points = sequelize.define("reponses_dessin_points", {
+        FK_Exo_ID: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            references: {
+                model: "exercices",
+                key: "pk_exo_id",
+            },
+        },
+        numero_trait: {
+            type: Sequelize.INTEGER,
+        },
+        point1_x: {
+            type: Sequelize.INTEGER,
+        },
+        point1_y: {
+            type: Sequelize.INTEGER,
+        },
+        point2_x: {
+            type: Sequelize.INTEGER,
+        },
+        point2_y: {
+            type: Sequelize.INTEGER,
+        }
+    });
+
+    return Reponses_dessin_points;
+};
+```
+
+```js title="./src/models/index.js"
+...
+db.reponse_dessin_points = require("./reponse_dessin_points.model")(sequelize, Sequelize);
+...
+// reponses_dessin_points => exercices
+db.exercices.hasMany(db.reponse_dessin_points, { foreignKey: "FK_Exo_ID" });
+db.reponse_dessin_points.belongsTo(db.exercices, { foreignKey: "FK_Exo_ID" });
+...
+```
+
+-----
+
+## Contrôleur
+
+```js title="./src/controllers/alecol.reponse_dessin_points.controllers.js"
+const db = require("../models");
+const Reponse = db.reponse_dessin_points;
+const Op = db.Sequelize.Op;
+
+// Récupérer toutes les réponses dessin points de la base de données
+exports.findAll = (req, res) => {
+    const exoId = req.query.fk_exo_id;
+
+    var condition = exoId ? { FK_Exo_ID: { [Op.like]: `${exoId}` } } : null;
+
+    Reponse.findAll({ where: condition })
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message:
+                err.message || "Une erreur s'est produite lors de la récupération des réponses dessin points.",
+            });
+        });
+};
+
+// Trouver une seule réponse dessin points avec un identifiant
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+    Reponse.findByPk(id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: "Erreur lors de la récupération de la réponse dessin points avec l'id=" + id,
+            });
+        });
+};
+```
+
+-----
+
+## Route
+
+```js title="./src/routes/alecol.reponse_dessin_points.routes.js"
+module.exports = (app) => {
+    const reponse_dessin_points = require("../controllers/alecol.reponse_dessin_points.controllers");
+
+    var router = require("express").Router();
+
+    // Récupérer toutes les réponses dessin points
+    router.get("/", reponse_dessin_points.findAll);
+
+    // Récupérer une seule réponse dessin points avec id
+    router.get("/:id", reponse_dessin_points.findOne);
+
+    app.use("/api/reponsesDessinPoints", router);
+};
+```
+
+```js title="server.js"
+...
+require("./src/routes/alecol.reponse_dessin_points.routes")(app);
+...
+```

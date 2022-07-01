@@ -36,7 +36,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // définir une route GET simple à tester
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to my application Alecol." });
+  res.json({ message: "Bienvenue sur l'application Alecol" });
 });
 
 // MPD Élève
@@ -49,35 +49,41 @@ require("./src/routes/alecol.matiere.routes")(app);
 // MPD Compétences
 require("./src/routes/alecol.metacomp.routes")(app);
 require("./src/routes/alecol.catcomp.routes")(app);
+require("./src/routes/alecol.c_cc_cg.routes")(app);
+require("./src/routes/alecol.cg_cs.routes")(app);
 
 // MPD Exercices
-require("./src/routes/alecol.phaseapp.routes")(app);
-require("./src/routes/alecol.natureactiv.routes")(app);
-require("./src/routes/alecol.activite_clnt.routes")(app);
+require("./src/routes/alecol.papp.routes")(app);
+require("./src/routes/alecol.nac.routes")(app);
+require("./src/routes/alecol.ac_clnt.routes")(app);
 require("./src/routes/alecol.exercice.routes")(app);
 require("./src/routes/alecol.Rep_txt.routes")(app);
 require("./src/routes/alecol.Rep_Img.routes")(app);
 require("./src/routes/alecol.reponse_exos.routes")(app);
 require("./src/routes/alecol.reponse_memory.routes")(app);
 require("./src/routes/alecol.reponse_paires.routes")(app);
-require("./src/routes/alecol.type_reponse.routes")(app);
+require("./src/routes/alecol.reponse_trous.routes")(app);
+require("./src/routes/alecol.reponse_dessin_points.routes")(app);
+require("./src/routes/alecol.score_eleves.routes")(app);
+require("./src/routes/alecol.type_exo.routes")(app);
+require("./src/routes/alecol.param_rep_image.routes")(app);
 require("./src/routes/alecol.lesson.routes")(app);
-require("./src/routes/alecol.elements.routes")(app);
+require("./src/routes/alecol.images.routes")(app);
 
 
 // définir le port 8082 pour écouter les demandes entrantes
 const PORT = process.env.REACT_APP_BACKEND_PORT;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+    console.log(`Le serveur s'exécute sur le port ${PORT}.`);
 });
 
 const db = require("./src/models");
 const insertData = require("./src/scripts/insertData");
 // La synchronisation est à éviter pour plusieurs raisons :
-// Primo, c'est inutile et dangereux, car ça peut effacer les données : seulement si on positionne à force=true
-// Deuxio, elle recrée les tables, mais en ajoutant un S au nom de la table
-// Tertio, si on veut recréer les tables, il faut être très explicite
-//db.sequelize.sync({alter: true}).then(() => {
+// - Primo, c'est inutile et dangereux, car ça peut effacer les données : seulement si on positionne à force=true
+// - Deuxio, elle recrée les tables, mais en ajoutant un S au nom de la table
+// - Tertio, si on veut recréer les tables, il faut être très explicite
+// db.sequelize.sync({alter: true}).then(() => {
 // avec aucun paramètre, cela ne crée la table que si elle n'existe pas
 db.sequelize
     .sync()

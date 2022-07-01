@@ -6,33 +6,37 @@
 import http from "../http-common";
 
 class EleveDataService {
-    getAll() {
-        return http.get("/eleve");
-    }
+  getAll() {
+    return http.get("/eleve");
+  }
 
-    get(id) {
-        return http.get(`/eleve/${id}`);
-    }
+  get(id) {
+    return http.get(`/eleve/${id}`);
+  }
 
-    post(data) {
-        return http.post("/eleve", data);
-    }
+  post(data) {
+    return http.post("/eleve", data);
+  }
 
-    findByNom(nom) {
-        return http.get(`/eleve?nom=${nom}`);
-    }
+  findByNom(prenom) {
+    return http.get(`/eleve?prenom=${prenom}`);
+  }
 
-    findByEmail(email) {
-        return http.get(`/eleve?email=${email}`);
-    }
+  login(data) {
+    return http.post("/eleve/login", data);
+  }
 
-    login(data) {
-        return http.post("/eleve/login", data);
-    }
+  getUserFromToken(token) {
+    return http.post("/eleve/getUser", token);
+  }
 
-    getUserFromToken(token) {
-        return http.post("/eleve/getUser", token);
-    }
+  isNewInMatiere(eleve_id, matiere_id) {
+    return http.get(`/eleve/is_new_in_matiere?eleve_id=${eleve_id}&id_matiere=${matiere_id}`)
+  }
+
+  updateUserMatiereStatus(eleve_id, matiere_id) {
+    return http.post(`/eleve/update_matiere_status?eleve_id=${eleve_id}&id_matiere=${matiere_id}`)
+  }
 }
 
 export default new EleveDataService();
@@ -55,47 +59,44 @@ export default Services;
 
 ```js title="./src/models/eleve.model.js"
 module.exports = (sequelize, Sequelize) => {
-    const Eleve = sequelize.define("eleve", {
-        id: {
-            type: Sequelize.INTEGER,
-            primaryKey: true,
-            autoIncrement: true,
-        },
-        nom: {
-            type: Sequelize.STRING,
-        },
+  const Eleve = sequelize.define("eleve", {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    prenom: {
+      type: Sequelize.STRING,
+    },
+    password: {
+      type: Sequelize.STRING,
+    },
+    date_fin: {
+      type: Sequelize.DATE,
+    },
+    date_inscription: {
+      type: Sequelize.DATE,
+    },
+    fk_classe_id: {
+      type: Sequelize.STRING,
+      references: {
+        model: "classe",
+        key: "id",
+      },
+    },
+  });
 
-        email: {
-            type: Sequelize.STRING,
-        },
-        password: {
-            type: Sequelize.STRING,
-        },
-        createTime: {
-            type: Sequelize.DATE,
-        },
-        dateNaissance: {
-            type: Sequelize.DATE,
-        },
-        dateDebut: {
-            type: Sequelize.DATE,
-        },
-        classe_id: {
-            type: Sequelize.STRING,
-            references: {
-                model: "classe",
-                key: "id",
-            },
-        },
-    });
-
-    return Eleve;
+  return Eleve;
 };
 ```
 
 ```js title="./src/models/index.js"
 ...
 db.eleves = require("./eleve.model")(sequelize, Sequelize);
+...
+// eleves => classes
+db.classes.hasMany(db.eleves, { foreignKey: "fk_classe_id" });
+db.eleves.belongsTo(db.classes, { foreignKey: "fk_classe_id" });
 ...
 ```
 
@@ -108,14 +109,16 @@ const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 
 const db = require("../models");
+
 const Eleve = db.eleves;
+
 const Op = db.Sequelize.Op;
 
-// Retrieve all competences from the database.
+// Récupérer tous les élèves de la base de données.
 exports.findAll = (req, res) => {
-    const email = req.query.email;
+    const prenom = req.query.prenom;
 
-    var condition = email ? { email: { [Op.like]: `${email}` } } : null;
+    var condition = prenom ? { prenom: { [Op.like]: `${prenom}` } } : null;
 
     Eleve.findAll({ where: condition })
         .then((data) => {
@@ -124,12 +127,12 @@ exports.findAll = (req, res) => {
         .catch((err) => {
             res.status(500).send({
                 message:
-                err.message || "Some error occurred while retrieving Competences.",
+                err.message || "Une erreur s'est produite lors de la récupération des Elèves.",
             });
         });
 };
 
-// Find a single competence with an id
+// Trouver un seul élève avec un identifiant
 exports.findOne = (req, res) => {
     const id = req.params.id;
 
@@ -139,45 +142,49 @@ exports.findOne = (req, res) => {
         })
         .catch((err) => {
             res.status(500).send({
-                message: "Error retrieving Competence with id=" + id,
+                message: "Erreur lors de la récupération de l'élève avec l'id=" + id,
             });
         });
 };
 
 exports.postOne = (req, res) => {
     let data = req.body;
-
-    data = { ...data, classe_id: "CP" };
-
+    data = { ...data, fk_classe_id: "CP" };
     Eleve.create(data)
         .then(() => {
             res.send("inscription réussi");
         })
         .catch((err) => {
             res.status(500).send({
-                message: "Register Error",
+                message: err,
             });
         });
-};
+}
 
 exports.loginEleve = (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const prenom = req.body.prenom;
+    const passwordEnfant = req.body.password;
 
-    var condition = email ? { email: { [Op.like]: `${email}` } } : null;
+    var condition = prenom ? { prenom: { [Op.like]: `${prenom}` } } : null;
 
-    Eleve.findAll({ where: condition }).then((data) => {
+    Eleve.findAll({ where: condition })
+        .then((data) => {
         if (
-            data[0].email === email &&
-            bcrypt.compareSync(password, data[0].password)
+            data[0].prenom === prenom &&
+            bcrypt.compareSync(passwordEnfant, data[0].password)
         ) {
-            const token = jwt.sign({ id: data[0].id, nom: data[0].nom }, "MA_CLE", {
+            const token = jwt.sign({ id: data[0].id, prenom: data[0].prenom }, "MA_CLE", {
                 expiresIn: "1h",
             });
 
             res.status(200).send({ token: token });
         }
-    });
+        })
+        .catch((err) => {
+            res.status(500).send({
+                message: err,
+            });
+        });
 };
 ```
 
@@ -214,4 +221,74 @@ module.exports = (app) => {
 ...
 require("./src/routes/alecol.eleve.routes")(app);
 ...
+```
+
+```sql
+--
+-- Table structure for table `eleve`
+--
+
+DROP TABLE IF EXISTS `eleve`;
+CREATE TABLE IF NOT EXISTS `eleve` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `prenom` varchar(45) NOT NULL,
+  `nom` varchar(255) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  `password` varchar(1000) NOT NULL,
+  `createTime` date DEFAULT NULL,
+  `dateNaissance` date DEFAULT NULL,
+  `dateDebut` date DEFAULT NULL,
+  `classe_id` varchar(5) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Email_UNIQUE` (`email`),
+  KEY `fk_Eleve_classe1_idx` (`classe_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `eleve`
+--
+
+INSERT INTO `eleve` (`id`, `prenom`, `nom`, `email`, `password`, `createTime`, `dateNaissance`, `dateDebut`, `classe_id`) VALUES
+(1, 'Bachelier', '', 'frederic_bachelier@yahoo.com', 'aaaaa', '2021-10-01', '1971-10-01', '2021-10-01', 'CP'),
+(2, 'yassine', '', 'yassine19265@gmail.com', '$2a$10$KdTsiWi4oaKiIOfNNeA9WOaLlex33A1mvZcKlqFjX8Aw.hLclJCyi', '1995-05-20', '1995-05-20', '1995-05-20', 'CP'),
+(3, 'antoto', '', 'tonin386@gmail.com', '$2a$10$NohKDmuDTFrzkt8ZdT3G1e5xbgOJAAQKgbhRJPZ9kWfg4EEAYS.A2', '2000-09-30', '2000-09-30', '2000-09-30', 'CP'),
+(5, 'laid', '', 'laid@gmail.com', '$2a$10$u93iKcHZJqQVvnUEkD2heOKNHgXAdBJ2gNQ3lJhcP5kBrJ0DPAtay', '1999-02-10', '1999-02-10', '1999-02-10', 'CP'),
+(27, 'sofiane', '', 'sofiane@gmail.com', '$2a$10$meFBDYzPYbgUdo9RVKwFv.PpjJ2qrqsfO923xcdM9xmf/WZAzATEi', '2010-10-10', '2010-10-10', '2010-10-10', 'CP'),
+(32, 'cc', 'aa', 'aabb@gmail.com', '$2a$10$CqCxF2NvxVzn8K9w1ynotuADImHq5CODDmF5RhEYduBR3pasmIQIi', NULL, NULL, '2022-06-14', 'CP'),
+(33, 'c', 'a', 'ab@gmail.com', '$2a$10$QtnTg5MQ3lLd4aN7Vx7fI.XV/WPVsIePY.eoeKTPW37GCxcCMhwXK', NULL, NULL, '2022-06-15', 'CP'),
+(35, 'cc', 'aa', 'aabbd@gmail.com', '$2a$10$DhT78bnhXcOOJw8UhArLveB8APK7fekpTP4TlBUmKUY430A.zLoSC', NULL, NULL, '2022-06-26', 'CP'),
+(36, 'ccc', 'aaa', 'aaabbb@gmail.com', '$2a$10$bGW/vW648bE3GTZ0mFIR.OwqcJPyrZR2KSfjFZc/frib7ZovLdnsa', NULL, NULL, '2022-06-26', 'CP');
+
+-- --------------------------------------------------------
+```
+
+```sql
+--
+-- Table structure for table `parent`
+--
+
+DROP TABLE IF EXISTS `parent`;
+CREATE TABLE IF NOT EXISTS `parent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nom` varchar(255) COLLATE utf32_bin DEFAULT NULL,
+  `prenom` varchar(255) COLLATE utf32_bin DEFAULT NULL,
+  `email` varchar(255) COLLATE utf32_bin DEFAULT NULL,
+  `password` varchar(255) COLLATE utf32_bin DEFAULT NULL,
+  `createTime` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf32 COLLATE=utf32_bin;
+
+--
+-- Dumping data for table `parent`
+--
+
+INSERT INTO `parent` (`id`, `nom`, `prenom`, `email`, `password`, `createTime`) VALUES
+(11, 'alex', 'martin', 'alexmartin@gmail.com', '$2a$10$G3N.7Fuq0AG1kOWWPyzqd.jVb3qrNhGRO4HOWhOWfjSvrZY171Gly', NULL),
+(18, 'aa', 'bb', 'aabb@gmail.com', '$2a$10$orbdcvNkPkJXCxgbQLd5hO.kRxSnjJaOOz6TQna1V5Ok7nTYj4Wxi', NULL),
+(19, 'a', 'b', 'ab@gmail.com', '$2a$10$9f8NDRp3y45NiiyEUiaZOew44ye/O3M8HtoMuG0abWfP9ouE2qSW.', NULL),
+(20, 'aa', 'bb', 'aabb@gmail.com', '$2a$10$acAlAGlpLFEg5kDte6xW7.bs4XWOm9g5aVOQfEw0qwq8t41hiEdXu', NULL),
+(21, 'aa', 'bb', 'aabbd@gmail.com', '$2a$10$WqKwH3IxFF/kp3sVb2rh3.Pw3EzBwS42EiEK0150MzSX.qCgSaPPO', NULL),
+(22, 'aaa', 'bbb', 'aaabbb@gmail.com', '$2a$10$Xg.t.80TnRL4y1rSS9J5C.O7gwzkP/s.IPNVNlxnPeSWA1uz.j4hq', NULL);
+
+-- --------------------------------------------------------
 ```

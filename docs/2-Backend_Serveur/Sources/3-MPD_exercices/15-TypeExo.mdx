@@ -130,3 +130,82 @@ module.exports = (app) => {
 require("./src/routes/alecol.type_exo.routes")(app);
 ...
 ```
+
+```sql
+-- phpMyAdmin SQL Dump
+-- version 5.1.1
+-- https://www.phpmyadmin.net/
+--
+-- Hôte : localhost
+-- Généré le : jeu. 30 juin 2022 à 15:01
+-- Version du serveur : 8.0.29-0ubuntu0.20.04.3
+-- Version de PHP : 7.4.3
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de données : `alecol_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `type_exo`
+--
+
+CREATE TABLE `type_exo` (
+  `id` varchar(5) NOT NULL,
+  `nom` varchar(32) NOT NULL,
+  `description` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8_general_ci NOT NULL,
+  `TypeExo` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--
+-- Déchargement des données de la table `type_exo`
+--
+
+INSERT INTO `type_exo` (`id`, `nom`, `description`, `TypeExo`) VALUES
+('B', 'Binaire', 'Exercice où il faut trouver la b', 'Type_Select'),
+('B1', 'Binaire', 'Exercice où il faut trouver la b', 'Type_Select'),
+('B2', 'Binaire', 'Exercice où il faut trouver la b', 'Type_Select'),
+('D1', 'Dessin', 'Exercice où il faut dessiner lib', 'Type_Dessin_Libre'),
+('D2', 'Dessin', 'Exercice où il faut colorier des', ''),
+('D3', 'Dessin', 'Exercice où il faut dessiner des', ''),
+('D4', 'Dessin', 'Exercice où il faut déplacer des', ''),
+('L', 'Labyrinthe', 'Exercice de labyrinthe', ''),
+('M', 'Memory', 'Un exercice de type Memory', 'Type_Flip'),
+('P', 'Relier les paires', 'Un exercice où il faut relier de', 'Type_Link_Gilles'),
+('Q', 'QCM', 'Un exercice de type QCM', 'Type_Select'),
+('Q1', 'QCM', 'Un exercice de type QCM', 'Type_Select'),
+('Q2', 'QCM', 'Un exercice de type QCM (questio', 'Type_Select'),
+('Q3', 'QCM', 'Un exercice de type QCM où il fa', 'Type_Select'),
+('R', 'Relier les points', 'Un exercice où il faut relier de', 'Type_Dessin_Points'),
+('RT', 'Repérage', 'Exercice de repérage dans un tab', ''),
+('S', 'Sériation', 'Exercice où il faut ordonner les', 'Type_Seriation'),
+('T', 'Exercice à trous', 'Un exercice à trous', 'Type_Fill'),
+('T1', 'Exercice à trous', 'Exercice à trous', 'Type_Fill_Gilles');
+
+--
+-- Index pour les tables déchargées
+--
+
+--
+-- Index pour la table `type_exo`
+--
+ALTER TABLE `type_exo`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ID` (`id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+```
