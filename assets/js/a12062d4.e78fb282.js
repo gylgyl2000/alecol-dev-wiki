@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkalecol_dev_wiki=self.webpackChunkalecol_dev_wiki||[]).push([[9042],{3724:l=>{l.exports=JSON.parse('{"label":"hello","permalink":"/alecol-dev-wiki/blog/tags/hello","allTagsPath":"/alecol-dev-wiki/blog/tags","count":2}')}}]);

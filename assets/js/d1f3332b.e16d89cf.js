@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkalecol_dev_wiki=self.webpackChunkalecol_dev_wiki||[]).push([[1166],{4053:e=>{e.exports=JSON.parse('{"label":"facebook","permalink":"/alecol-dev-wiki/blog/tags/facebook","allTagsPath":"/alecol-dev-wiki/blog/tags","count":1}')}}]);

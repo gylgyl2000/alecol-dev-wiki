@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkalecol_dev_wiki=self.webpackChunkalecol_dev_wiki||[]).push([[8535],{4678:e=>{e.exports=JSON.parse('{"permalink":"/alecol-dev-wiki/blog/tags/hola","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);
