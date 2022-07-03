@@ -1,4 +1,6 @@
-export const Highlight = ({children, color}) => (
+import React from 'react';
+
+const Highlight = ({children, color}) => (
 <span
     style={{
         backgroundColor: color,
@@ -10,3 +12,5 @@ export const Highlight = ({children, color}) => (
     {children}
   </span>
 );
+
+export default Highlight;

@@ -8,8 +8,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Alécol',
   tagline: '(Apprentissage Lecture & Calcul On-Line)',
-  url: 'https://gylgyl2000.github.io/alecol-dev-wiki',
-  baseUrl: '/',
+  url: 'https://gylgyl2000.github.io',
+  baseUrl: '/alecol-dev-wiki/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/cropped-logo-Alecol.png',
@@ -18,7 +18,7 @@ const config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'Frederic7101', // Usually your GitHub org/user name.
   projectName: 'RepoAlecol', // Usually your repo name.
-
+  deploymentBranch: 'gh-pages',
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
   // to replace "en" with "zh-Hans".
@@ -56,6 +56,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
       navbar: {
         title: 'Alécol',
         logo: {
