@@ -11,6 +11,7 @@ const config = {
   url: 'https://gylgyl2000.github.io',
   baseUrl: '/alecol-dev-wiki/',
   onBrokenLinks: 'throw',
+  trailingSlash: false,
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/cropped-logo-Alecol.png',
 
@@ -113,8 +114,8 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'Tutoriel',
+                to: '/docs/tutoriel',
               },
             ],
           },

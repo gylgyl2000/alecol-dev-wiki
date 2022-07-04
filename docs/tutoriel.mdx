@@ -1,0 +1,44 @@
+# Tutoriel
+
+## Le site Web
+
+Ce site Web est construit à l'aide de [Docusaurus 2](https://docusaurus.io/), un générateur de site Web statique moderne.
+
+### Installation
+
+```shell
+$ yarn
+```
+
+### Développement local
+
+```shell
+$ yarn start
+```
+
+Cette commande démarre un serveur de développement local et ouvre une fenêtre de navigateur. La plupart des modifications sont reflétées
+en direct sans avoir à redémarrer le serveur.
+
+### La construction
+
+```shell
+$ yarn build
+```
+
+Cette commande génère du contenu statique dans le répertoire `build` et peut être servi à l'aide de n'importe quel service d'hébergement de contenu statique.
+
+### Le déploiement
+
+En utilisant SSH :
+
+```shell
+$ USE_SSH=true yarn deploy
+```
+
+Sans utiliser SSH :
+
+```shell
+$ GIT_USER=<Your GitHub username> yarn deploy
+```
+
+Si vous utilisez des pages GitHub pour l'hébergement, cette commande est un moyen pratique de créer le site Web et de pousser vers la branche `gh-pages`.
