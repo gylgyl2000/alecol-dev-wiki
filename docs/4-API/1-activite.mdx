@@ -1,0 +1,114 @@
+import Highlight from "../../src/components/highlight"
+import CodeBlock from '@theme/CodeBlock';
+
+# Activité
+
+<details style={{padding: '4px'}}>
+    <summary>
+        <Highlight color="#61affe">GET</Highlight>
+        <span style={{fontSize: '125%', margin: '0 2rem 0 1rem'}}>
+            <b><code>api/activite/</code></b>
+        </span>
+        Affiche toutes les activités
+    </summary>
+    <div style={{fontFamily: 'sans-serif',
+        fontSize: '100%',
+        margin: '0 0 5px',
+        padding: '15px 20px'}}>
+        Renvoie toutes les activités
+    </div>
+    <CodeBlock language="json" title="Exemple">
+{`[
+  {
+    "nom": "Généraliser que l'addition +n re",
+    "description": "Exercice où il faut trouver la bonne réponse parmi 2 possibles",
+    "objectif": "0",
+    "consigne": "",
+    "typrep": "B1",
+    "num_activite": 1,
+    "Classe_ID": "CP",
+    "Lesson_ID": "AD1",
+    "nac_id": "F",
+    "pk_ac_id": "CP-AD1-F-1-B1"
+  }
+]`}
+    </CodeBlock>
+</details>
+
+<details style={{padding: '4px'}}>
+    <summary>
+        <Highlight color="#61affe">GET</Highlight>
+        <span style={{fontSize: '125%', margin: '0 2rem 0 1rem'}}>
+            <b><code>/api/activite/&#123;id}</code></b>
+        </span>
+        Affiche une activité par son id
+    </summary>
+    <div style={{fontFamily: 'sans-serif',
+        fontSize: '100%',
+        margin: '0 0 5px',
+        padding: '15px 20px'}}>
+        Renvoie une activité
+    </div>
+    <CodeBlock language="json" title="Exemple">
+{`[
+  {
+    
+  }
+]`}
+    </CodeBlock>
+</details>
+
+<details style={{padding: '4px'}}>
+    <summary>
+        <Highlight color="#61affe">GET</Highlight>
+        <span style={{fontSize: '125%', margin: '0 2rem 0 1rem'}}>
+            <b><code>/api/activite?pk_ac_id=&#123;pk_ac_id}</code></b>
+        </span>
+        Affiche une activité par sa clé primaire
+    </summary>
+    <div style={{fontFamily: 'sans-serif',
+        fontSize: '100%',
+        margin: '0 0 5px',
+        padding: '15px 20px'}}>
+        Renvoie une activité
+    </div>
+    <CodeBlock language="json" title="Exemple : /api/activite?pk_ac_id=CP-AD1-F-1-B1">
+{`[
+    {
+        "nom":"Généraliser que l'addition +n re",
+        "description":"Exercice où il faut trouver la bonne réponse parmi 2 possibles",
+        "objectif":"0",
+        "consigne":"",
+        "typrep":"B1",
+        "num_activite":1,
+        "Classe_ID":"CP",
+        "Lesson_ID":"AD1",
+        "nac_id":"F",
+        "pk_ac_id":"CP-AD1-F-1-B1"
+    }
+]`}
+    </CodeBlock>
+</details>
+
+<details style={{padding: '4px'}}>
+    <summary>
+        <Highlight color="#61affe">GET</Highlight>
+        <span style={{fontSize: '125%', margin: '0 2rem 0 1rem'}}>
+            <b><code>/api/activite?lessonid=&#123;LessonId}</code></b>
+        </span>
+        Affiche les activités par leçon
+    </summary>
+    <div style={{fontFamily: 'sans-serif',
+        fontSize: '100%',
+        margin: '0 0 5px',
+        padding: '15px 20px'}}>
+        Renvoie des activités
+    </div>
+    <CodeBlock language="json" title="Exemple">
+{`[
+  {
+    
+  }
+]`}
+    </CodeBlock>
+</details>
