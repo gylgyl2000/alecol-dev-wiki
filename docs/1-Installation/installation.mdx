@@ -2,16 +2,173 @@
 sidebar_position: 2
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+# Manuel d'installation
 
-# Installation
+## Prérequis
+
+Fichiers nécessaires à l’installation :
+- creation users.sql
+- creation insertion tables.sql
+
+## Installation de l’environnement de développement
+
+Le projet ALECOL est construit sur une pile Fullstack ReactJS/NodeJS, utilisant une base de données MySQL via Express.
+
+Il faut donc installer ces différentes briques logicielles.
+
+### Installation de NodeJS
+
+Cette étape consiste à télécharger et installer node.js sur la machine : [https://nodejs.org/en/](https://nodejs.org/en/)
+
+#### Paramétrage des ports
+
+Les ports utilisés sont paramétrés dans plusieurs endroits :
+
+Les ports 8080 et 8081, utilisé pour communiquer avec le serveur NodeJS :
+1. Fichier **server.js** dans le répertoire racine<br />
+Ce fichier contient le port 8080 et 8081 (utilisé par le CORS)
+2. Fichier **.env** dans le répertoire racine, ex : `C:\Users\fbacheli\Documents\1 - Fba\programmation\React\alecol`<br />
+Ce fichier contient le port utilisé, ex : 8080
+3. Fichier **http-common.js** dans le répertoire src, ex : `C:\Users\fbacheli\Documents\1 - Fba\programmation\React\alecol\src`<br />
+Ce fichier contient aussi le même port, à destination de Axios
+
+Le port 3306, utilisé pour communiquer avec la base de données :
+1. Fichier **index.js db.config.js** dans le répertoire des descripteurs de la base de données
+
+### Installation de Visual Studio
+Télécharger Visual Studio 2019 sur le site [https://visualstudio.microsoft.com/fr/downloads/](https://visualstudio.microsoft.com/fr/downloads/)
+
+### Installation de MySQL
+
+Télécharger sur le site [https://dev.mysql.com/downloads/installer/](https://dev.mysql.com/downloads/installer/)
+
+Inutile de se logger ni de créer un compte.
+
+version community mysql-installer-community-8.0.23.0.msi (no thanks, just start my download)
+
+### Installation de Wampserver 32bits
+
+Télécharger la version 32 bits (la version 64 bits est bugguée) [https://www.wampserver.com/](https://www.wampserver.com/)
+
+### Chargement de la base de données.
+
+- Démarrer Wampserver
+- Suivre le lien [http://localhost/phpmyadmin/](http://localhost/phpmyadmin/)
+- Lancer wampServer
+- Ouvrir phpMyAdmin avec le compte root
+- Créer la database alecol_db
+- Se positionner sur la base de données alecol_db
+- Cliquer sur importer et charger le fichier creation insertion.sql
+- Cliquer sur Exécuter
+
+Lors de l’import des fichiers, il ne devrait pas y avoir d’erreurs !
+
+### Téléchargement et Installation de git.
+
+La première étape c’est de télécharger et d’installer git sur la machine via le lien suivant : [https://git-scm.com/downloads](https://git-scm.com/downloads)
+
+la deuxième étape consiste à ouvrir une console (cmd), se positionner là où on veut installer les sources et taper la commande :
+
+```shell
+git clone https://github.com/Frederic7101/RepoAlecol.git
+```
+
+### Installation du projet.
+
+Se positionner au niveau du projet RepoAlecol et lancer la commande npm install.
+
+```shell
+cd RepoAlecol
+npm install
+```
+
+## Démarrage de l’environnement de développement
+
+### Démarrer le serveur de base de données Mysql
+
+- S’assurer qu’aucune autre application utilise les mêmes ports que NodeJS et ReactJS, sinon il faut stopper les applications pour libérer les ports.
+- Démarrer les services Wampserver pour fournir un serveur Mysql
+- Démarrer PhpMyAdmin depuis l’icône de Wamp qui doit être passé au vert
+- Se connecter avec le compte alecolweb (mot de passe alecol) pour vérifier que tout est OK
+
+### Démarrage du serveur backend NodeJS
+
+#### Prérequis
+
+Si l’application nécessite une base de données, il faut démarrer le serveur de base de données avant NodeJS.
+
+#### Démarrer le serveur NodeJS
+
+Se positionner dans le répertoire du projet où est installée l’instance de NodeJS dédiée au projet ALECOL.
+
+```shell
+cd RepoAlecol
+```
+
+Démarrer le serveur NodeJS :
+
+```shell
+node server
+```
+
+#### Troubleshooting
+
+Les logs indiquent le message suivant, ceci signifie que le port 8080 est déjà utilisé, i.e. qu’une autre application utilise déjà ce port. La solution
+immédiate est de stopper l’autre application pour libérer le port. La solution plus pérenne est de paramétrer différemment pour que les applications
+n’utilisent pas le même port.
+
+```shell
+Error: listen EADDRINUSE: address already in use :::8080
+    at Server.setupListenHandle [as _listen2] (net.js:1318:16)
+    at listenInCluster (net.js:1366:12)
+    at Server.listen (net.js:1452:7)
+    at Function.listen (C:\Users\fbacheli\Documents\1 - Fba\programmation\React\alecol\node_modules\express\lib\application.js:618:24)
+    at Object.<anonymous> (C:\Users\fbacheli\Documents\1 - Fba\programmation\React\alecol\server.js:32:5)
+    at Module._compile (internal/modules/cjs/loader.js:1063:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:1092:10)
+    at Module.load (internal/modules/cjs/loader.js:928:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:769:14)
+    at Function.executeUserEntryPoint [as runMain] (internal/modules/run_main.js:72:12)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (net.js:1345:8)
+    at processTicksAndRejections (internal/process/task_queues.js:80:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 8080
+}
+```
+
+### Démarrage du serveur frontend React JS
+
+Se positionner dans le répertoire du projet où est installé l’instance de ReactJS dédiée au projet ALECOL.
+
+```shell
+cd RepoAlecol
+```
+
+Démarrer le serveur ReactJS :
+
+```shell
+npm start
+```
+
+## Versions du document
+
+| Date | Version | Auteur | Modification |
+|------|---------|--------|--------------|
+| 02/05/2022 | | F. Bachelier | Modification du script SQL |
+  
+-----
+
+## (Installation)
 
 **ReactJS - NodeJS - MySQL**
 
 -----
 
-## Cloner le dépôt Alécol
+### Cloner le dépôt Alécol
 
 ```shell
 git clone https://github.com/Frederic7101/RepoAlecol.git
@@ -19,7 +176,7 @@ git clone https://github.com/Frederic7101/RepoAlecol.git
 
 -----
 
-## Installer la base de données
+### Installer la base de données
 
 Le fichier source se trouve dans le dossier suivant :
 `./RepoAlecol/documents/scripts/creation_insertion.sql`
@@ -30,7 +187,7 @@ Importer la base `creation_insertion.sql`.
 
 -----
 
-## Installer les dépendances
+### Installer les dépendances
 
 ```shell
 cd RepoAlecol
@@ -39,7 +196,7 @@ npm install
 
 -----
 
-## Démarrer le serveur MySQL
+### Démarrer le serveur MySQL
 
 ```shell
 sudo mysql -u root -p
@@ -47,7 +204,7 @@ sudo mysql -u root -p
 
 -----
 
-## Lancer le serveur backend
+### Lancer le serveur backend
 
 ```shell
 cd RepoAlecol
@@ -58,7 +215,7 @@ http://localhost:8082
 
 -----
 
-## Lancer l'application frontend
+### Lancer l'application frontend
 
 ```shell
 cd RepoAlecol

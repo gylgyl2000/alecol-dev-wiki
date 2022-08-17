@@ -1,0 +1,89 @@
+# 10 bonnes pratiques React à mettre en place en 2022
+
+React est l'un des frameworks frontaux les plus connus pour JavaScript. Il est très opiniâtre, contrairement à d'autres frameworks tels que Angular.
+Par conséquent, c'est à vous de déterminer comment vous voulez écrire ou façonner votre code React.
+
+Cet article explore certaines pratiques que vous devez observer pour améliorer les performances globales de votre application React.
+
+## Utiliser des composants fonctionnels et des Hooks au lieu de classes
+
+Dans React, vous pouvez utiliser des composants de classe ou useful avec des hooks. Vous devez cependant utiliser très souvent des composants et des
+hooks pratiques, car ils aboutissent à un code plus concis et lisible contrairement aux classes.
+
+## Évitez d'utiliser l'état (si possible)
+
+L'état React conserve une trace des faits qui, lorsqu'ils sont modifiés, déclenchent le rendu du problème React. Lors de la création d'applications
+React, évitez d'utiliser des pays autant que possible car plus l'état que vous utilisez est grand, plus les données supplémentaires dont vous avez
+besoin pour conserver une trace tout au long de votre application.
+
+Une façon de minimiser l'utilisation de l'état consiste à le déclarer uniquement lorsque cela est nécessaire. Par exemple, si vous récupérez des
+données personnelles à partir d'une API, conservez l'intégralité de l'objet consommateur dans cet état plutôt que de stocker les propriétés
+individuelles.
+
+## Regroupez les fichiers liés au même composant dans un seul dossier.
+
+Lors de l'identification d'une structure de projet, optez pour une structure centrée sur les composants. Cette capacité a tous les fichiers concernant
+un composant dans un dossier.
+
+Si vous aviez créé un composant Navbar, créez un dossier appelé navbar contenant le composant Navbar lui-même, la feuille de mode et d'autres archives
+JavaScript et d'actifs utilisées dans le composant.
+
+Un dossier unique contenant tous les fichiers d'un composant facilite la réutilisation, le partage et le débogage. Si vous avez besoin de voir comment
+fonctionne un facteur, vous ne voulez ouvrir qu'un seul dossier.
+
+## Évitez d'utiliser des index comme accessoires clés
+
+React utilise des clés pour percevoir de manière unique les éléments d'un tableau. Avec les clés, React peut identifier quel objet a été modifié,
+ajouté ou supprimé du tableau.
+
+Actuellement, le premier élément de la liste, 'Item1' est à l'index zéro, mais si vous avez apporté un autre objet au début de la liste, l'index 'Item1'
+alternerait à 1, ce qui change le comportement de votre tableau.
+
+La solution consiste à utiliser une valeur spéciale comme index pour s'assurer que l'identité de l'élément de la liste est conservée.
+
+## Optez pour des fragments au lieu de divs si possible
+
+Les facteurs React doivent renvoyer du code enveloppé dans une seule balise, généralement une div ou un fragment React. Vous devez choisir des
+fragments dans la mesure du possible.
+
+L'utilisation de div augmentera la taille du DOM, en particulier dans les grands projets, car plus vous avez de balises ou de nœuds DOM, plus votre
+site Web a besoin de mémoire supplémentaire et plus le navigateur utilise de puissance pour charger votre site Web. Cela conduit à une vitesse de page
+Web inférieure et probablement à une mauvaise expérience utilisateur.
+
+## Suivez les conventions de dénomination
+
+Vous devez continuellement utiliser PascalCase lorsque vous nommez des composants pour les différencier des différents fichiers JSX non composants. Par
+exemple : TextField, NavMenu et SuccessButton.
+
+Utilisez camelCase pour les fonctions déclarées dans les composants React comme handleInput() ou showElement().
+
+## Évitez le code répétitif
+
+Si vous notez que vous écrivez du code dupliqué, convertissez-le en composants qui peuvent être réutilisés.
+
+Par exemple, il est plus logique de créer un problème pour votre menu de navigation au lieu d'écrire encore et encore le code dans tout ce qui nécessite
+un menu.
+
+C'est l'avantage d'une architecture à base de composants. Vous pouvez ruiner votre projet en petits éléments que vous pouvez réutiliser dans votre
+application.
+
+## Utilisez la déstructuration d'objets pour les accessoires
+
+Au lieu de passer l'objet props, utilisez la déstructuration d'objet pour ignorer le nom du prop. Cela élimine le besoin de se référer à l'objet props
+chaque fois que vous avez besoin de l'utiliser.
+
+## Rendu dynamique des tableaux à l'aide de map
+
+Utilisez map() pour restituer dynamiquement des blocs HTML répétés. Par exemple, vous pouvez utiliser map() pour afficher une liste d'éléments dans les
+balises li.
+
+## Ecrire des tests pour chaque composant React
+
+Rédigez des évaluations pour les composants que vous créez, car cela réduit les risques d'erreurs. Les tests garantissent que les composants
+fonctionnent comme prévu. L'un des frameworks de test les plus fréquents pour React est Jest, et il offre un environnement où vous pouvez exécuter vos
+tests.
+
+React est un outil puissant, mais il doit être utilisé de manière spécifique.
+
+Bien que React soit quelque peu flexible en termes d'utilisation, suivre des pratiques précises vous aidera à tirer le meilleur parti de votre
+expérience.

@@ -95,7 +95,7 @@ const config = {
           },
           {
             type: 'doc',
-            docId: 'Documents/Conception_detaillee',
+            docId: 'Documents/Mettre_en_place_un_exercice',
             position: 'left',
             label: 'Documents',
           },
